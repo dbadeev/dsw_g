@@ -1,0 +1,128 @@
+# 数据清洗总结
+
+## 总览
+
+| | 数量 |
+|---|---|
+| 原始数据 | 10,098 |
+| 删除 | 1,445 (14.3%) |
+| **最终数据** | **8,653** |
+
+---
+
+## 删除明细
+
+### Round 1：完全无效的记录（329条）
+
+这些记录没有任何有意义的agent行为。
+
+| 类型 | 数量 | 说明 |
+|---|---|---|
+| 空轨迹 | 121 | 0条消息，API完全没响应 |
+| 启动即崩溃 | 193 | status=error，≤3轮就挂了，agent没有任何实质行为 |
+| API连续失败 | 15 | tau2bench harness检测到API多次连续失败，主动终止 |
+
+所有329条reward=0。
+
+### Round 2：API中途断开的截断轨迹（228条）
+
+这些记录有 `status=error`，agent工作了一段时间（平均61-195轮），但LLM API突然断开。轨迹最后一条是tool返回消息，agent没有最终回复。167条reward=0，61条reward>0（评分不可靠，轨迹不完整任务实际未完成）。
+
+| Benchmark | 数量 | 平均轮数 |
+|---|---|---|
+| swebench | 148 | 195 |
+| mcpbench | 57 | 61 |
+| terminalbench | 23 | 105 |
+
+### Round 3：无最终回答的不完整轨迹（888条）
+
+与Round 2模式相同（轨迹不完整，agent没有给出最终回答），但没有 `status=error` 标记。原因是mathhay和search没有status字段，之前的过滤漏掉了。
+
+| 类型 | 数量 | 说明 |
+|---|---|---|
+| 结尾是tool消息 | 597 | agent调用了tool但之后没有继续回复（token limit/模型自行停止） |
+| agent从未回复 | 291 | 只有system+user消息，agent完全没有响应 |
+
+所有888条reward=0。
+
+**受影响最大的模型：** DeepSeek-V3.2（415条）和DeepSeek-R1（318条），主要集中在search的browsecomp任务上。
+
+**所有删除记录的reward均为0** — 没有误删成功的轨迹。
+
+---
+
+## 各Benchmark删除情况
+
+| Benchmark | 原始 | R1 | R2 | R3 | 最终 | 删除比例 | 主要问题 |
+|---|---|---|---|---|---|---|---|
+| tau2bench | 1,000 | -15 | 0 | -1 | **984** | 1.6% | API连续失败(R1) |
+| swebench | 998 | -101 | -148 | -2 | **747** | 25.2% | 空轨迹+API中途断开(R1,R2) |
+| terminalbench | 1,580 | -128 | -23 | 0 | **1,429** | 9.6% | 启动即崩溃(R1) |
+| mathhay | 1,500 | 0 | 0 | -176 | **1,324** | 11.7% | agent调tool后未回复(R3) |
+| search | 3,980 | -1 | 0 | -709 | **3,270** | 17.8% | agent未回复/tool结尾(R3) |
+| mcpbench | 1,040 | -84 | -57 | 0 | **899** | 13.6% | 启动崩溃+API断开(R1,R2) |
+
+- **swebench损失最大（25.2%）**：主要是DeepSeek-R1和Qwen3-235B的API不稳定导致空轨迹和中途断开
+- **search损失第二（17.8%）**：主要是DeepSeek-V3.2在browsecomp任务上频繁出现agent不回复
+- **tau2bench最稳定（1.6%）**：几乎没有问题
+
+---
+
+## 删除标准总结
+
+所有删除的记录满足以下任一条件：
+1. **没有轨迹**：空轨迹或agent从未回复
+2. **轨迹不完整**：最后一条消息不是assistant（agent没有给出最终回答）
+3. **全部reward=0**：没有误删成功的轨迹
+
+核心原则：**一条完整的轨迹应该以assistant消息结尾，表示agent给出了最终回答（无论对错）。不完整的轨迹无法用于让judge判断正确与否。**
+
+---
+
+## 最终数据
+
+### 各Benchmark统计
+
+| Benchmark | 记录数 | 成功率 | 平均轮数 | Reward类型 |
+|---|---|---|---|---|
+| search | 3,270 | 22.1% | 15.0 | binary (0/1) |
+| terminalbench | 1,429 | 19.2% | 33.4 | binary (0/1) |
+| mathhay | 1,324 | 46.5% | 3.8 | binary (0/1) |
+| tau2bench | 984 | 39.1% | 32.0 | binary (0/1) |
+| mcpbench | 899 | 13.1% | 26.1 | continuous (0-10) |
+| swebench | 747 | 21.4% | 69.6 | binary (0/1) |
+| **总计** | **8,653** | | | |
+
+### 各模型记录数
+
+| Model | tau2bench | swebench | terminalbench | mathhay | search | mcpbench | 合计 |
+|---|---|---|---|---|---|---|---|
+| DeepSeek-R1 | 189 | 110 | 196 | 300 | 479 | 146 | 1,420 |
+| DeepSeek-V3.2 | 198 | 115 | 313 | 240 | 441 | 176 | 1,483 |
+| Gemini-2.5-Flash | 198 | 198 | 306 | 234 | 792 | 182 | 1,910 |
+| Qwen3-235B | 199 | 130 | 302 | 250 | 762 | 187 | 1,830 |
+| Qwen3-Next | 200 | 194 | 312 | 300 | 796 | 208 | 2,010 |
+
+### Pass完整性（删除后部分task不再有4个轨迹）
+
+| Benchmark | 总task数 | 4 passes完整 | <4 passes |
+|---|---|---|---|
+| tau2bench | 250 | 237 (94.8%) | 13 (5.2%) |
+| swebench | 230 | 137 (59.6%) | 93 (40.4%) |
+| terminalbench | 380 | 323 (85.0%) | 57 (15.0%) |
+| mathhay | 371 | 282 (76.0%) | 89 (24.0%) |
+| search | 893 | 722 (80.9%) | 171 (19.1%) |
+| mcpbench | 251 | 191 (76.1%) | 60 (23.9%) |
+
+每条记录已标注 `has_all_4_passes` 和 `num_passes_available` 字段，可直接筛选完整4 passes的子集。
+
+---
+
+## 数据恢复
+
+| 文件 | 内容 |
+|---|---|
+| `parallel_scaling_results/` | 原始eval+trace文件，从未修改 |
+| `dataset_clean/removed_truncated.json` | Round 2 删除的228条（完整数据） |
+| `dataset_clean/removed_incomplete.json` | Round 3 删除的888条（完整数据） |
+| `dataset_clean/removal_log.json` | 删除规则和计数汇总 |

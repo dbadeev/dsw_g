@@ -1,0 +1,57 @@
+{
+  "lowercase": true,
+  "collapse_whitespace": true,
+  "numbers": true,
+  "number_precision": 2,
+  "currency": true,
+  "currency_symbols": [
+    "$",
+    "€",
+    "£",
+    "¥"
+  ],
+  "currency_codes": [
+    "USD",
+    "EUR",
+    "GBP",
+    "JPY"
+  ],
+  "currency_symbol_codes": {
+    "$": "USD",
+    "€": "EUR",
+    "£": "GBP",
+    "¥": "JPY"
+  },
+  "timestamps": true,
+  "timestamp_formats": [],
+  "assume_utc": true,
+  "id_patterns": {
+    "items.item_id": "^\\d{10}$",
+    "orders.order_id": "^#W\\d{7}$",
+    "orders.user_id": "^[A-Za-z]+_[A-Za-z]+_\\d+$",
+    "products.product_id": "^\\d{10}$",
+    "users.user_id": "^[A-Za-z]+_[A-Za-z]+_\\d+$"
+  },
+  "id_upper": true,
+  "id_strip_chars": "",
+  "unordered_lists": [],
+  "unordered_all": false,
+  "case_sensitive_paths": [
+    "actions.action_id",
+    "action_id",
+    "items.item_id",
+    "item_id",
+    "orders.exchange_payment_method_id",
+    "exchange_payment_method_id",
+    "orders.order_id",
+    "order_id",
+    "orders.return_payment_method_id",
+    "return_payment_method_id",
+    "orders.user_id",
+    "user_id",
+    "products.product_id",
+    "product_id",
+    "users.user_id"
+  ],
+  "default_class": "hard"
+}

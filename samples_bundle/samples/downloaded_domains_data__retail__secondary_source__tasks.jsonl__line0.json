@@ -1,0 +1,15 @@
+{
+  "_line": 0,
+  "_labels": {},
+  "record": {
+    "bucket": "w0t3+p2+",
+    "instruction": "",
+    "recordings": 1,
+    "refused": false,
+    "replay_confirmed": true,
+    "stage": "trusted",
+    "stopped_because": null,
+    "task_id": "task_4b73db804770",
+    "trusted": true
+  }
+}

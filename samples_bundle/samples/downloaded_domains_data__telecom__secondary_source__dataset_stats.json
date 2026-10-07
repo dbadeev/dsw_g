@@ -1,0 +1,23 @@
+{
+  "total_samples": 0,
+  "rfcs_processed": 30,
+  "agent_types": 15,
+  "model_used": "qwen3:32b",
+  "domains": [
+    "transport",
+    "security",
+    "5g_sbi",
+    "routing",
+    "management",
+    "vpn",
+    "charging",
+    "mobile_core",
+    "qos",
+    "voip",
+    "dns",
+    "aaa",
+    "5g",
+    "5g_transport"
+  ],
+  "generated_at": "2026-05-23T08:01:53.753617"
+}

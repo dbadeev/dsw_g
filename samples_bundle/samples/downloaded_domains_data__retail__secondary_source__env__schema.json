@@ -1,0 +1,1309 @@
+{
+  "columns": [
+    {
+      "class": "exempt",
+      "class_confidence": "high",
+      "class_reason": "a column of the harness's record of the calls that end the Run",
+      "class_rule": "exempt",
+      "classified_by": "code",
+      "evidence": {
+        "actions_of": [
+          "transfer_to_human_agents"
+        ]
+      },
+      "name": "action_id",
+      "samples": [],
+      "table": "actions",
+      "vocabulary": []
+    },
+    {
+      "class": "exempt",
+      "class_confidence": "high",
+      "class_reason": "a column of the harness's record of the calls that end the Run",
+      "class_rule": "exempt",
+      "classified_by": "code",
+      "evidence": {
+        "actions_of": [
+          "transfer_to_human_agents"
+        ]
+      },
+      "name": "args",
+      "samples": [],
+      "table": "actions",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "high",
+      "class_reason": "a column of the harness's record of the calls that end the Run",
+      "class_rule": "hard",
+      "classified_by": "code",
+      "evidence": {
+        "actions_of": [
+          "transfer_to_human_agents"
+        ]
+      },
+      "name": "tool",
+      "samples": [],
+      "table": "actions",
+      "vocabulary": []
+    },
+    {
+      "class": "exempt",
+      "class_confidence": "high",
+      "class_reason": "a column of the harness's record of the calls that end the Run",
+      "class_rule": "exempt",
+      "classified_by": "code",
+      "evidence": {
+        "actions_of": [
+          "transfer_to_human_agents"
+        ]
+      },
+      "name": "turn",
+      "samples": [],
+      "table": "actions",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "high",
+      "class_reason": "every recorded call of the tool of this name answered the same value and took the same arguments, so the world holds it as a constant",
+      "class_rule": "hard",
+      "classified_by": "observed",
+      "evidence": {
+        "constant_of": "list_all_product_types",
+        "constant_value": {
+          "Action Camera": "3377618313",
+          "Air Purifier": "3821016478",
+          "Backpack": "2524789262",
+          "Bicycle": "9783735446",
+          "Bluetooth Speaker": "4768869376",
+          "Bookshelf": "8600330539",
+          "Coffee Maker": "7996920482",
+          "Cycling Helmet": "7765186836",
+          "Desk Lamp": "6817146515",
+          "Digital Camera": "8940227892",
+          "Dumbbell Set": "7233192239",
+          "E-Reader": "3801771308",
+          "Electric Kettle": "1075968781",
+          "Electric Toothbrush": "7352963235",
+          "Espresso Machine": "4354588079",
+          "Fleece Jacket": "8560156827",
+          "Gaming Mouse": "5713490933",
+          "Garden Hose": "6679515468",
+          "Grill": "6819683148",
+          "Headphones": "6992792935",
+          "Hiking Boots": "7363354090",
+          "Indoor Security Camera": "2985987096",
+          "Jigsaw Puzzle": "1808611083",
+          "LED Light Bulb": "2696197613",
+          "Laptop": "4760268021",
+          "...__more_keys__": 25
+        }
+      },
+      "name": "list_all_product_types",
+      "samples": [
+        {
+          "Action Camera": "3377618313",
+          "Air Purifier": "3821016478",
+          "Backpack": "2524789262",
+          "Bicycle": "9783735446",
+          "Bluetooth Speaker": "4768869376",
+          "Bookshelf": "8600330539",
+          "Coffee Maker": "7996920482",
+          "Cycling Helmet": "7765186836",
+          "Desk Lamp": "6817146515",
+          "Digital Camera": "8940227892",
+          "Dumbbell Set": "7233192239",
+          "E-Reader": "3801771308",
+          "Electric Kettle": "1075968781",
+          "Electric Toothbrush": "7352963235",
+          "Espresso Machine": "4354588079",
+          "Fleece Jacket": "8560156827",
+          "Gaming Mouse": "5713490933",
+          "Garden Hose": "6679515468",
+          "Grill": "6819683148",
+          "Headphones": "6992792935",
+          "Hiking Boots": "7363354090",
+          "Indoor Security Camera": "2985987096",
+          "Jigsaw Puzzle": "1808611083",
+          "LED Light Bulb": "2696197613",
+          "Laptop": "4760268021",
+          "...__more_keys__": 25
+        }
+      ],
+      "table": "constants",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "low",
+      "class_reason": "no rule matched, defaulting to hard for review; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 5639,
+        "count": 5639,
+        "distinct": 2,
+        "max_len": 0,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "bool"
+        ]
+      },
+      "name": "available",
+      "samples": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "table": "items",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "high",
+      "class_reason": "the corpus addresses rows by this column and finds a value of its own per row, so it is an id whatever it is called; basis: observed (calls f7f8c505-c827-41e0-8ab9-1dbd48692958:7, 2458deb5-524d-44e9-a77c-f9a509115537:7, 50c539c3-7f61-4ee4-aece-dddaaeee4886:5, 50c539c3-7f61-4ee4-aece-dddaaeee4886:6, 2867fb22-3e37-4f7a-b86f-283081499bd7:7; 24 supporting calls in all)",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "observed",
+        "class_contradicts_name": false,
+        "class_support": [
+          [
+            "f7f8c505-c827-41e0-8ab9-1dbd48692958",
+            7
+          ],
+          [
+            "2458deb5-524d-44e9-a77c-f9a509115537",
+            7
+          ],
+          [
+            "50c539c3-7f61-4ee4-aece-dddaaeee4886",
+            5
+          ],
+          [
+            "50c539c3-7f61-4ee4-aece-dddaaeee4886",
+            6
+          ],
+          [
+            "2867fb22-3e37-4f7a-b86f-283081499bd7",
+            7
+          ]
+        ],
+        "class_support_count": 24,
+        "count": 5639,
+        "distinct": 243,
+        "id_basis": "observed",
+        "id_contradicts_name": false,
+        "id_fact": true,
+        "id_support": [
+          [
+            "f7f8c505-c827-41e0-8ab9-1dbd48692958",
+            7
+          ],
+          [
+            "2458deb5-524d-44e9-a77c-f9a509115537",
+            7
+          ],
+          [
+            "50c539c3-7f61-4ee4-aece-dddaaeee4886",
+            5
+          ],
+          [
+            "50c539c3-7f61-4ee4-aece-dddaaeee4886",
+            6
+          ],
+          [
+            "2867fb22-3e37-4f7a-b86f-283081499bd7",
+            7
+          ]
+        ],
+        "id_support_count": 24,
+        "max_len": 10,
+        "monotonic": false,
+        "sampled": 400,
+        "table_basis": "name",
+        "types": [
+          "str"
+        ]
+      },
+      "name": "item_id",
+      "samples": [
+        "1646531091",
+        "9844888101",
+        "4107812777",
+        "1421289881",
+        "1646531091"
+      ],
+      "table": "items",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "low",
+      "class_reason": "no rule matched, defaulting to hard for review; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 5639,
+        "count": 5639,
+        "distinct": 243,
+        "max_len": 0,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "dict"
+        ]
+      },
+      "name": "options",
+      "samples": [
+        "{\"battery life\":\"6 hours\",\"color\":\"blue\",\"water resistance\":\"IPX4\"}",
+        "{\"color\":\"black\",\"processor\":\"i7\",\"ram\":\"8GB\",\"screen size\":\"15-inch\",\"storage\":\"1TB SSD\"}",
+        "{\"color\":\"black\",\"material\":\"synthetic\",\"size\":\"9\",\"sole\":\"rubber\"}",
+        "{\"backlight\":\"none\",\"size\":\"80%\",\"switch type\":\"linear\"}",
+        "{\"battery life\":\"6 hours\",\"color\":\"blue\",\"water resistance\":\"IPX4\"}"
+      ],
+      "table": "items",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "low",
+      "class_reason": "no rule matched, defaulting to hard for review; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 5639,
+        "count": 5639,
+        "distinct": 242,
+        "max_len": 0,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "float"
+        ]
+      },
+      "name": "price",
+      "samples": [
+        232.49,
+        2459.74,
+        155.33,
+        268.77,
+        232.49
+      ],
+      "table": "items",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "low",
+      "class_reason": "no rule matched, defaulting to hard for review; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 1728,
+        "count": 1728,
+        "distinct": 70,
+        "max_len": 0,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "dict"
+        ]
+      },
+      "name": "address",
+      "samples": [
+        "{\"address1\":\"313 Chestnut Street\",\"address2\":\"Suite 537\",\"city\":\"Jacksonville\",\"country\":\"USA\",\"state\":\"FL\",\"zip\":\"32286...",
+        "{\"address1\":\"313 Chestnut Street\",\"address2\":\"Suite 537\",\"city\":\"Jacksonville\",\"country\":\"USA\",\"state\":\"FL\",\"zip\":\"32286...",
+        "{\"address1\":\"313 Chestnut Street\",\"address2\":\"Suite 537\",\"city\":\"Jacksonville\",\"country\":\"USA\",\"state\":\"FL\",\"zip\":\"32286...",
+        "{\"address1\":\"320 Cedar Avenue\",\"address2\":\"Suite 116\",\"city\":\"San Antonio\",\"country\":\"USA\",\"state\":\"TX\",\"zip\":\"78219\"}",
+        "{\"address1\":\"579 Highland Drive\",\"address2\":\"Suite 492\",\"city\":\"San Diego\",\"country\":\"USA\",\"state\":\"CA\",\"zip\":\"92199\"}"
+      ],
+      "table": "orders",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "high",
+      "class_reason": "short strings from a small set, so an enum; basis: observed (calls 34c9ae89-8f83-4344-8a1e-db46563e5806:2, 34c9ae89-8f83-4344-8a1e-db46563e5806:3, 34c9ae89-8f83-4344-8a1e-db46563e5806:5, 9365ac4f-c3db-4b93-baad-0c53ee512eb1:2, 9365ac4f-c3db-4b93-baad-0c53ee512eb1:3; 1728 supporting calls in all)",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "observed",
+        "class_contradicts_name": false,
+        "class_support": [
+          [
+            "34c9ae89-8f83-4344-8a1e-db46563e5806",
+            2
+          ],
+          [
+            "34c9ae89-8f83-4344-8a1e-db46563e5806",
+            3
+          ],
+          [
+            "34c9ae89-8f83-4344-8a1e-db46563e5806",
+            5
+          ],
+          [
+            "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+            2
+          ],
+          [
+            "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+            3
+          ]
+        ],
+        "class_support_count": 1728,
+        "count": 1728,
+        "distinct": 3,
+        "max_len": 18,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "NoneType",
+          "str"
+        ]
+      },
+      "name": "cancel_reason",
+      "samples": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "table": "orders",
+      "vocabulary": [
+        "no longer needed",
+        "ordered by mistake"
+      ]
+    },
+    {
+      "class": "hard",
+      "class_confidence": "low",
+      "class_reason": "no rule matched, defaulting to hard for review; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 1728,
+        "count": 1728,
+        "distinct": 14,
+        "max_len": 0,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "NoneType",
+          "list"
+        ]
+      },
+      "name": "exchange_items",
+      "samples": [
+        null,
+        null,
+        "[\"8118291112\"]",
+        null,
+        null
+      ],
+      "table": "orders",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "low",
+      "class_reason": "no rule matched, defaulting to hard for review; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 1728,
+        "count": 1728,
+        "distinct": 13,
+        "max_len": 0,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "NoneType",
+          "list"
+        ]
+      },
+      "name": "exchange_new_items",
+      "samples": [
+        null,
+        null,
+        "[\"8277474082\"]",
+        null,
+        null
+      ],
+      "table": "orders",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "high",
+      "class_reason": "column name looks like an id; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 1728,
+        "count": 1728,
+        "distinct": 13,
+        "id_basis": "name",
+        "id_contradicts_name": false,
+        "id_fact": true,
+        "id_support": [],
+        "id_support_count": 0,
+        "max_len": 19,
+        "monotonic": false,
+        "sampled": 400,
+        "table_basis": "name",
+        "types": [
+          "NoneType",
+          "str"
+        ]
+      },
+      "name": "exchange_payment_method_id",
+      "samples": [
+        null,
+        null,
+        "paypal_3024827",
+        null,
+        null
+      ],
+      "table": "orders",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "low",
+      "class_reason": "no rule matched, defaulting to hard for review; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 1728,
+        "count": 1728,
+        "distinct": 14,
+        "max_len": 0,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "NoneType",
+          "float"
+        ]
+      },
+      "name": "exchange_price_difference",
+      "samples": [
+        null,
+        null,
+        -23.99,
+        null,
+        null
+      ],
+      "table": "orders",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "low",
+      "class_reason": "no rule matched, defaulting to hard for review; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 1728,
+        "count": 1728,
+        "distinct": 64,
+        "max_len": 0,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "list"
+        ]
+      },
+      "name": "fulfillments",
+      "samples": [
+        "[{\"item_ids\":[\"4293355847\"],\"tracking_id\":[\"908856694334\"]}]",
+        "[{\"item_ids\":[\"5753502325\",\"9851293632\",\"3778705663\",\"8118291112\",\"3020722515\"],\"tracking_id\":[\"418708581751\"]}]",
+        "[{\"item_ids\":[\"5753502325\",\"9851293632\",\"3778705663\",\"8118291112\",\"3020722515\"],\"tracking_id\":[\"418708581751\"]}]",
+        "[]",
+        "[]"
+      ],
+      "table": "orders",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "low",
+      "class_reason": "no rule matched, defaulting to hard for review; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 1728,
+        "count": 1728,
+        "distinct": 141,
+        "max_len": 0,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "list"
+        ]
+      },
+      "name": "items",
+      "samples": [
+        "[{\"item_id\":\"4293355847\",\"name\":\"Skateboard\",\"options\":{\"deck material\":\"bamboo\",\"design\":\"plain\",\"length\":\"31 inch\"},\"p...",
+        "[{\"item_id\":\"5753502325\",\"name\":\"Garden Hose\",\"options\":{\"color\":\"green\",\"length\":\"25ft\",\"material\":\"rubber\"},\"price\":96...",
+        "[{\"item_id\":\"5753502325\",\"name\":\"Garden Hose\",\"options\":{\"color\":\"green\",\"length\":\"25ft\",\"material\":\"rubber\"},\"price\":96...",
+        "[{\"item_id\":\"7824298782\",\"name\":\"Backpack\",\"options\":{\"color\":\"black\",\"compartment\":\"laptop\",\"material\":\"nylon\",\"size\":\"...",
+        "[{\"item_id\":\"4127323219\",\"name\":\"Hiking Boots\",\"options\":{\"material\":\"synthetic\",\"size\":\"10\",\"waterproof\":\"no\"},\"price\":..."
+      ],
+      "table": "orders",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "high",
+      "class_reason": "the corpus addresses rows by this column and finds a value of its own per row, so it is an id whatever it is called; basis: observed (calls 34c9ae89-8f83-4344-8a1e-db46563e5806:2, 34c9ae89-8f83-4344-8a1e-db46563e5806:3, 34c9ae89-8f83-4344-8a1e-db46563e5806:5, 9365ac4f-c3db-4b93-baad-0c53ee512eb1:2, 9365ac4f-c3db-4b93-baad-0c53ee512eb1:3; 1728 supporting calls in all)",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "observed",
+        "class_contradicts_name": false,
+        "class_support": [
+          [
+            "34c9ae89-8f83-4344-8a1e-db46563e5806",
+            2
+          ],
+          [
+            "34c9ae89-8f83-4344-8a1e-db46563e5806",
+            3
+          ],
+          [
+            "34c9ae89-8f83-4344-8a1e-db46563e5806",
+            5
+          ],
+          [
+            "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+            2
+          ],
+          [
+            "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+            3
+          ]
+        ],
+        "class_support_count": 1728,
+        "count": 1728,
+        "distinct": 120,
+        "id_basis": "observed",
+        "id_contradicts_name": false,
+        "id_fact": true,
+        "id_support": [
+          [
+            "34c9ae89-8f83-4344-8a1e-db46563e5806",
+            2
+          ],
+          [
+            "34c9ae89-8f83-4344-8a1e-db46563e5806",
+            3
+          ],
+          [
+            "34c9ae89-8f83-4344-8a1e-db46563e5806",
+            5
+          ],
+          [
+            "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+            2
+          ],
+          [
+            "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+            3
+          ]
+        ],
+        "id_support_count": 1728,
+        "max_len": 9,
+        "monotonic": false,
+        "sampled": 400,
+        "table_basis": "name",
+        "types": [
+          "str"
+        ]
+      },
+      "name": "order_id",
+      "samples": [
+        "#W3792453",
+        "#W7181492",
+        "#W7181492",
+        "#W9154975",
+        "#W3289292"
+      ],
+      "table": "orders",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "low",
+      "class_reason": "no rule matched, defaulting to hard for review; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 1728,
+        "count": 1728,
+        "distinct": 158,
+        "max_len": 0,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "list"
+        ]
+      },
+      "name": "payment_history",
+      "samples": [
+        "[{\"amount\":200.8,\"payment_method_id\":\"paypal_3024827\",\"transaction_type\":\"payment\"}]",
+        "[{\"amount\":1262.41,\"payment_method_id\":\"paypal_3024827\",\"transaction_type\":\"payment\"}]",
+        "[{\"amount\":1262.41,\"payment_method_id\":\"paypal_3024827\",\"transaction_type\":\"payment\"}]",
+        "[{\"amount\":4207.86,\"payment_method_id\":\"paypal_8963303\",\"transaction_type\":\"payment\"}]",
+        "[{\"amount\":2468.7,\"payment_method_id\":\"paypal_8963303\",\"transaction_type\":\"payment\"}]"
+      ],
+      "table": "orders",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "low",
+      "class_reason": "no rule matched, defaulting to hard for review; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 1728,
+        "count": 1728,
+        "distinct": 16,
+        "max_len": 0,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "NoneType",
+          "list"
+        ]
+      },
+      "name": "return_items",
+      "samples": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "table": "orders",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "high",
+      "class_reason": "column name looks like an id; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 1728,
+        "count": 1728,
+        "distinct": 11,
+        "id_basis": "name",
+        "id_contradicts_name": false,
+        "id_fact": true,
+        "id_support": [],
+        "id_support_count": 0,
+        "max_len": 19,
+        "monotonic": false,
+        "sampled": 400,
+        "table_basis": "name",
+        "types": [
+          "NoneType",
+          "str"
+        ]
+      },
+      "name": "return_payment_method_id",
+      "samples": [
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "table": "orders",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "high",
+      "class_reason": "short strings from a small set, so an enum; basis: observed (calls 34c9ae89-8f83-4344-8a1e-db46563e5806:2, 34c9ae89-8f83-4344-8a1e-db46563e5806:3, 34c9ae89-8f83-4344-8a1e-db46563e5806:5, 9365ac4f-c3db-4b93-baad-0c53ee512eb1:2, 9365ac4f-c3db-4b93-baad-0c53ee512eb1:3; 1728 supporting calls in all)",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "observed",
+        "class_contradicts_name": false,
+        "class_support": [
+          [
+            "34c9ae89-8f83-4344-8a1e-db46563e5806",
+            2
+          ],
+          [
+            "34c9ae89-8f83-4344-8a1e-db46563e5806",
+            3
+          ],
+          [
+            "34c9ae89-8f83-4344-8a1e-db46563e5806",
+            5
+          ],
+          [
+            "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+            2
+          ],
+          [
+            "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+            3
+          ]
+        ],
+        "class_support_count": 1728,
+        "count": 1728,
+        "distinct": 7,
+        "max_len": 23,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "str"
+        ]
+      },
+      "name": "status",
+      "samples": [
+        "delivered",
+        "delivered",
+        "exchange requested",
+        "pending",
+        "pending"
+      ],
+      "table": "orders",
+      "vocabulary": [
+        "cancelled",
+        "delivered",
+        "exchange requested",
+        "pending",
+        "pending (item modified)",
+        "processed",
+        "return requested"
+      ]
+    },
+    {
+      "class": "hard",
+      "class_confidence": "high",
+      "class_reason": "column name looks like an id; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 1728,
+        "count": 1728,
+        "distinct": 40,
+        "id_basis": "name",
+        "id_contradicts_name": false,
+        "id_fact": true,
+        "id_support": [],
+        "id_support_count": 0,
+        "max_len": 23,
+        "monotonic": false,
+        "sampled": 400,
+        "table_basis": "name",
+        "types": [
+          "str"
+        ]
+      },
+      "name": "user_id",
+      "samples": [
+        "isabella_johansson_2152",
+        "isabella_johansson_2152",
+        "isabella_johansson_2152",
+        "james_kim_7213",
+        "james_kim_7213"
+      ],
+      "table": "orders",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "low",
+      "class_reason": "no rule matched, defaulting to hard for review; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 414,
+        "count": 414,
+        "distinct": 35,
+        "max_len": 22,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "str"
+        ]
+      },
+      "name": "name",
+      "samples": [
+        "Hiking Boots",
+        "Mechanical Keyboard",
+        "Smart Thermostat",
+        "Hiking Boots",
+        "Skateboard"
+      ],
+      "table": "products",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "high",
+      "class_reason": "the corpus addresses rows by this column and finds a value of its own per row, so it is an id whatever it is called; basis: observed (calls 34c9ae89-8f83-4344-8a1e-db46563e5806:4, add8260b-7ca4-4d35-b565-8d757784392c:2, add8260b-7ca4-4d35-b565-8d757784392c:3, 9de11474-afcf-4c47-b34d-9f68516b1331:5, bead9690-22ef-4229-bc0d-63b389488f74:6; 414 supporting calls in all)",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "observed",
+        "class_contradicts_name": false,
+        "class_support": [
+          [
+            "34c9ae89-8f83-4344-8a1e-db46563e5806",
+            4
+          ],
+          [
+            "add8260b-7ca4-4d35-b565-8d757784392c",
+            2
+          ],
+          [
+            "add8260b-7ca4-4d35-b565-8d757784392c",
+            3
+          ],
+          [
+            "9de11474-afcf-4c47-b34d-9f68516b1331",
+            5
+          ],
+          [
+            "bead9690-22ef-4229-bc0d-63b389488f74",
+            6
+          ]
+        ],
+        "class_support_count": 414,
+        "count": 414,
+        "distinct": 35,
+        "id_basis": "observed",
+        "id_contradicts_name": false,
+        "id_fact": true,
+        "id_support": [
+          [
+            "34c9ae89-8f83-4344-8a1e-db46563e5806",
+            4
+          ],
+          [
+            "add8260b-7ca4-4d35-b565-8d757784392c",
+            2
+          ],
+          [
+            "add8260b-7ca4-4d35-b565-8d757784392c",
+            3
+          ],
+          [
+            "9de11474-afcf-4c47-b34d-9f68516b1331",
+            5
+          ],
+          [
+            "bead9690-22ef-4229-bc0d-63b389488f74",
+            6
+          ]
+        ],
+        "id_support_count": 414,
+        "max_len": 10,
+        "monotonic": false,
+        "sampled": 400,
+        "table_basis": "name",
+        "types": [
+          "str"
+        ]
+      },
+      "name": "product_id",
+      "samples": [
+        "7363354090",
+        "1656367028",
+        "4896585277",
+        "7363354090",
+        "1968349452"
+      ],
+      "table": "products",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "low",
+      "class_reason": "no rule matched, defaulting to hard for review; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 414,
+        "count": 414,
+        "distinct": 35,
+        "max_len": 0,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "dict"
+        ]
+      },
+      "name": "variants",
+      "samples": [
+        "{\"1262139877\":{\"available\":false,\"item_id\":\"1262139877\",\"options\":{\"material\":\"synthetic\",\"size\":\"7\",\"waterproof\":\"yes\"}...",
+        "{\"1151293680\":{\"available\":true,\"item_id\":\"1151293680\",\"options\":{\"backlight\":\"RGB\",\"size\":\"full size\",\"switch type\":\"li...",
+        "{\"2791467853\":{\"available\":false,\"item_id\":\"2791467853\",\"options\":{\"color\":\"stainless steel\",\"compatibility\":\"Google Ass...",
+        "{\"1262139877\":{\"available\":false,\"item_id\":\"1262139877\",\"options\":{\"material\":\"synthetic\",\"size\":\"7\",\"waterproof\":\"yes\"}...",
+        "{\"2177997696\":{\"available\":true,\"item_id\":\"2177997696\",\"options\":{\"deck material\":\"plastic\",\"design\":\"custom\",\"length\":\"..."
+      ],
+      "table": "products",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "low",
+      "class_reason": "no rule matched, defaulting to hard for review; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 459,
+        "count": 459,
+        "distinct": 60,
+        "max_len": 0,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "dict"
+        ]
+      },
+      "name": "address",
+      "samples": [
+        "{\"address1\":\"313 Chestnut Street\",\"address2\":\"Suite 537\",\"city\":\"Jacksonville\",\"country\":\"USA\",\"state\":\"FL\",\"zip\":\"32286...",
+        "{\"address1\":\"579 Highland Drive\",\"address2\":\"Suite 492\",\"city\":\"San Diego\",\"country\":\"USA\",\"state\":\"CA\",\"zip\":\"92199\"}",
+        "{\"address1\":\"763 Broadway\",\"address2\":\"Suite 135\",\"city\":\"Philadelphia\",\"country\":\"USA\",\"state\":\"PA\",\"zip\":\"19122\"}",
+        "{\"address1\":\"123 Elm Street\",\"address2\":\"Suite 640\",\"city\":\"Austin\",\"country\":\"USA\",\"state\":\"TX\",\"zip\":\"78712\"}",
+        "{\"address1\":\"313 Chestnut Street\",\"address2\":\"Suite 537\",\"city\":\"Jacksonville\",\"country\":\"USA\",\"state\":\"FL\",\"zip\":\"32286..."
+      ],
+      "table": "users",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "low",
+      "class_reason": "no rule matched, defaulting to hard for review; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 459,
+        "count": 459,
+        "distinct": 53,
+        "max_len": 34,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "str"
+        ]
+      },
+      "name": "email",
+      "samples": [
+        "isabella.johansson9391@example.com",
+        "james.kim1995@example.com",
+        "yusuf.rossi7301@example.com",
+        "fatima.johnson2300@example.com",
+        "isabella.johansson9391@example.com"
+      ],
+      "table": "users",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "low",
+      "class_reason": "no rule matched, defaulting to hard for review; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 459,
+        "count": 459,
+        "distinct": 53,
+        "max_len": 0,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "dict"
+        ]
+      },
+      "name": "name",
+      "samples": [
+        "{\"first_name\":\"Isabella\",\"last_name\":\"Johansson\"}",
+        "{\"first_name\":\"James\",\"last_name\":\"Kim\"}",
+        "{\"first_name\":\"Yusuf\",\"last_name\":\"Rossi\"}",
+        "{\"first_name\":\"Fatima\",\"last_name\":\"Johnson\"}",
+        "{\"first_name\":\"Isabella\",\"last_name\":\"Johansson\"}"
+      ],
+      "table": "users",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "low",
+      "class_reason": "no rule matched, defaulting to hard for review; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 459,
+        "count": 459,
+        "distinct": 53,
+        "max_len": 0,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "list"
+        ]
+      },
+      "name": "orders",
+      "samples": [
+        "[\"#W3792453\",\"#W7181492\",\"#W5565470\",\"#W2575533\"]",
+        "[\"#W9154975\",\"#W3289292\",\"#W7284266\",\"#W9722559\"]",
+        "[\"#W6247578\",\"#W9711842\",\"#W4776164\",\"#W6679257\",\"#W2378156\"]",
+        "[\"#W5199551\",\"#W8665881\",\"#W9389413\"]",
+        "[\"#W3792453\",\"#W7181492\",\"#W5565470\",\"#W2575533\"]"
+      ],
+      "table": "users",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "low",
+      "class_reason": "no rule matched, defaulting to hard for review; basis: name",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "name",
+        "class_contradicts_name": false,
+        "class_support": [],
+        "class_support_count": 459,
+        "count": 459,
+        "distinct": 54,
+        "max_len": 0,
+        "monotonic": false,
+        "sampled": 400,
+        "types": [
+          "dict"
+        ]
+      },
+      "name": "payment_methods",
+      "samples": [
+        "{\"paypal_3024827\":{\"id\":\"paypal_3024827\",\"source\":\"paypal\"}}",
+        "{\"paypal_8963303\":{\"id\":\"paypal_8963303\",\"source\":\"paypal\"}}",
+        "{\"credit_card_9513926\":{\"brand\":\"mastercard\",\"id\":\"credit_card_9513926\",\"last_four\":\"2478\",\"source\":\"credit_card\"}}",
+        "{\"gift_card_1675628\":{\"balance\":99.0,\"id\":\"gift_card_1675628\",\"source\":\"gift_card\"},\"paypal_5364164\":{\"id\":\"paypal_53641...",
+        "{\"paypal_3024827\":{\"id\":\"paypal_3024827\",\"source\":\"paypal\"}}"
+      ],
+      "table": "users",
+      "vocabulary": []
+    },
+    {
+      "class": "hard",
+      "class_confidence": "high",
+      "class_reason": "the corpus addresses rows by this column and finds a value of its own per row, so it is an id whatever it is called; basis: observed (calls 34c9ae89-8f83-4344-8a1e-db46563e5806:1, 9365ac4f-c3db-4b93-baad-0c53ee512eb1:1, add8260b-7ca4-4d35-b565-8d757784392c:4, 9de11474-afcf-4c47-b34d-9f68516b1331:1, bead9690-22ef-4229-bc0d-63b389488f74:1; 459 supporting calls in all)",
+      "class_rule": "hard",
+      "classified_by": "rule",
+      "evidence": {
+        "class_basis": "observed",
+        "class_contradicts_name": false,
+        "class_support": [
+          [
+            "34c9ae89-8f83-4344-8a1e-db46563e5806",
+            1
+          ],
+          [
+            "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+            1
+          ],
+          [
+            "add8260b-7ca4-4d35-b565-8d757784392c",
+            4
+          ],
+          [
+            "9de11474-afcf-4c47-b34d-9f68516b1331",
+            1
+          ],
+          [
+            "bead9690-22ef-4229-bc0d-63b389488f74",
+            1
+          ]
+        ],
+        "class_support_count": 459,
+        "count": 459,
+        "distinct": 53,
+        "id_basis": "observed",
+        "id_contradicts_name": false,
+        "id_fact": true,
+        "id_support": [
+          [
+            "34c9ae89-8f83-4344-8a1e-db46563e5806",
+            1
+          ],
+          [
+            "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+            1
+          ],
+          [
+            "add8260b-7ca4-4d35-b565-8d757784392c",
+            4
+          ],
+          [
+            "9de11474-afcf-4c47-b34d-9f68516b1331",
+            1
+          ],
+          [
+            "bead9690-22ef-4229-bc0d-63b389488f74",
+            1
+          ]
+        ],
+        "id_support_count": 459,
+        "max_len": 23,
+        "monotonic": false,
+        "sampled": 400,
+        "table_basis": "name",
+        "types": [
+          "str"
+        ]
+      },
+      "name": "user_id",
+      "samples": [
+        "isabella_johansson_2152",
+        "james_kim_7213",
+        "yusuf_rossi_9620",
+        "fatima_johnson_7581",
+        "isabella_johansson_2152"
+      ],
+      "table": "users",
+      "vocabulary": []
+    }
+  ],
+  "composite_keys": {},
+  "homes": {
+    "items": "products.variants"
+  },
+  "id_patterns": {
+    "items.item_id": "^\\d{10}$",
+    "orders.order_id": "^#W\\d{7}$",
+    "orders.user_id": "^[A-Za-z]+_[A-Za-z]+_\\d+$",
+    "products.product_id": "^\\d{10}$",
+    "users.user_id": "^[A-Za-z]+_[A-Za-z]+_\\d+$"
+  },
+  "key_separator": "|",
+  "synthetic_rows": [
+    "1133777903",
+    "1176194968",
+    "1304426904",
+    "1327854740",
+    "1345513440",
+    "1355937109",
+    "1437889264",
+    "1507389580",
+    "1615379700",
+    "1631373418",
+    "1631806422",
+    "1763705424",
+    "1859994221",
+    "1999523885",
+    "2146648441",
+    "2177260429",
+    "2231112417",
+    "2405281423",
+    "2444431651",
+    "2540052208",
+    "2554056026",
+    "2698416822",
+    "2733768059",
+    "2872451762",
+    "3020722515",
+    "3034017579",
+    "3098764622",
+    "3104857380",
+    "3230708338",
+    "3232433601",
+    "3234800602",
+    "3275928196",
+    "3320557165",
+    "3330317167",
+    "3333391894",
+    "3369928769",
+    "3379843752",
+    "3526747930",
+    "3613716226",
+    "3704016729",
+    "...[+120 items]"
+  ],
+  "tables": [
+    "actions",
+    "constants",
+    "items",
+    "orders",
+    "products",
+    "users"
+  ]
+}

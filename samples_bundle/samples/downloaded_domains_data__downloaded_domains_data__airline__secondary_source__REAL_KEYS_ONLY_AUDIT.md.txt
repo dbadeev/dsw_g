@@ -1,0 +1,67 @@
+# Real Keys Only Audit (v3)
+
+这个文件只列真实存在的 key，不包含 `present=True`、count、sample tool names 这类额外统计。
+
+基于新版输出目录：
+- `dataset_clean_trace_meta_v3_release/`
+
+这版与旧 `dataset_clean/` 保留了完全相同的 8,653 条轨迹 ID，只额外新增了一个顶层字段：
+- `trace_meta`
+
+## Common Cleaned Keys
+
+- cleaned top-level keys: `['benchmark', 'cleaning_info', 'domain', 'eval_details', 'has_all_4_passes', 'id', 'messages', 'num_passes_available', 'num_turns', 'pass', 'reward', 'source_model', 'task_id', 'trace_meta']`
+- message union keys: `['content', 'name', 'role', 'tool_call_id', 'tool_calls']`
+- `tool_calls[*]` keys: `['function', 'id', 'type']`
+- `tool_calls[*].function` keys: `['arguments', 'name']`
+- tool message keys: `['content', 'name', 'role', 'tool_call_id']`
+- common `trace_meta.trace` keys: `['duration', 'end_time', 'error', 'final_response', 'rounds', 'start_time', 'steps', 'task_id', 'total_output_tokens', 'total_prompt_tokens', 'total_steps', 'total_tokens']`
+
+## tau2bench
+
+- sample id: `tau2bench__DeepSeek-R1__airline__0__pass1`
+- raw eval file: `parallel_scaling_results/DeepSeek-R1_tau2bench_distraction_all/pass_1/evaluations/tau2_airline_0_cfcd2084.json`
+- raw trace file: `parallel_scaling_results/DeepSeek-R1_tau2bench_distraction_all/pass_1/traces/tau2_airline_0_cfcd2084.json`
+- raw eval top-level keys: `['agent_cost', 'domain', 'duration', 'end_time', 'id', 'messages', 'model_name', 'reward_info', 'seed', 'start_time', 'task_id', 'termination_reason', 'timestamp', 'trial', 'user_cost']`
+- raw trace top-level keys: `['benchmark', 'domain', 'error', 'task_id', 'total_steps', 'trace']`
+- raw `trace` keys: `['duration', 'end_time', 'error', 'final_response', 'messages', 'rounds', 'start_time', 'steps', 'task_id', 'total_output_tokens', 'total_prompt_tokens', 'total_steps', 'total_tokens']`
+- cleaned `eval_details` keys: `['agent_cost', 'domain', 'duration', 'end_time', 'error', 'id', 'model_name', 'reward_info', 'seed', 'start_time', 'task_id', 'termination_reason', 'timestamp', 'trial', 'user_cost']`
+- cleaned `eval_details.reward_info` keys: `['action_checks', 'communicate_checks', 'db_check', 'env_assertions', 'info', 'nl_assertions', 'reward', 'reward_basis', 'reward_breakdown']`
+- cleaned `eval_details.reward_info.db_check` keys: `['db_match', 'db_reward']`
+- cleaned `eval_details.reward_info.reward_breakdown` keys: `['ACTION', 'COMMUNICATE', 'DB', 'ENV_ASSERTION']`
+- cleaned `trace_meta` keys: `['benchmark', 'domain', 'error', 'task_id', 'total_steps', 'trace']`
+
+## swebench
+
+- sample id: `swebench__DeepSeek-R1__astropy__astropy__astropy-13398__pass1`
+- raw eval file: `parallel_scaling_results/DeepSeek-R1_swebench_distraction_100/pass_1/evaluations/swebench_astropy_astropy-13398.json`
+- raw trace file: `parallel_scaling_results/DeepSeek-R1_swebench_distraction_100/pass_1/traces/swebench_astropy_astropy-13398.json`
+- raw eval top-level keys: `['benchmark', 'domain', 'execution_time', 'final_response', 'gold_patch', 'gold_patch_length', 'model_name', 'note', 'patch', 'patch_length', 'report', 'resolved', 'reward', 'status', 'success', 'task_id', 'task_path', 'test_output', 'test_passed', 'tests_status', 'total_rounds', 'total_tokens']`
+- raw trace top-level keys: `['benchmark', 'domain', 'error', 'task_id', 'task_path', 'total_steps', 'trace']`
+- raw `trace` keys: `['duration', 'end_time', 'error', 'final_response', 'messages', 'rounds', 'start_time', 'steps', 'task_id', 'total_output_tokens', 'total_prompt_tokens', 'total_steps', 'total_tokens']`
+- cleaned `eval_details` keys: `['benchmark', 'domain', 'execution_time', 'final_response', 'gold_patch', 'gold_patch_length', 'model_name', 'note', 'patch', 'patch_length', 'report', 'resolved', 'reward', 'status', 'success', 'task_id', 'task_path', 'test_output', 'test_passed', 'tests_status', 'total_rounds', 'total_tokens']`
+- cleaned `eval_details.report` keys: `['patch_exists', 'patch_successfully_applied', 'resolved', 'tests_status']`
+- cleaned `eval_details.report.tests_status` keys: `['FAIL_TO_FAIL', 'FAIL_TO_PASS', 'PASS_TO_FAIL', 'PASS_TO_PASS']`
+- cleaned `eval_details.tests_status` keys: `['FAIL_TO_FAIL', 'FAIL_TO_PASS', 'PASS_TO_FAIL', 'PASS_TO_PASS']`
+- cleaned `eval_details.tests_status.FAIL_TO_FAIL` keys: `['failure', 'success']`
+- cleaned `eval_details.tests_status.FAIL_TO_PASS` keys: `['failure', 'success']`
+- cleaned `eval_details.tests_status.PASS_TO_FAIL` keys: `['failure', 'success']`
+- cleaned `eval_details.tests_status.PASS_TO_PASS` keys: `['failure', 'success']`
+- cleaned `trace_meta` keys: `['benchmark', 'domain', 'error', 'task_id', 'task_path', 'total_steps', 'trace']`
+
+## terminalbench
+
+- sample id: `terminalbench__DeepSeek-R1__games__blind-maze-explorer-5x5__pass1`
+- raw eval file: `parallel_scaling_results/DeepSeek-R1_terminalbench_distraction_100/pass_1/evaluations/terminalbench_blind-maze-explorer-5x5.json`
+- raw trace file: `parallel_scaling_results/DeepSeek-R1_terminalbench_distraction_100/pass_1/traces/terminalbench_blind-maze-explorer-5x5.json`
+- raw eval top-level keys: `['benchmark', 'domain', 'execution_time', 'final_response', 'model_name', 'note', 'reward', 'status', 'success', 'task_id', 'task_path', 'test_output', 'test_passed', 'total_rounds', 'total_tokens']`
+- raw trace top-level keys: `['benchmark', 'domain', 'error', 'task_id', 'task_path', 'total_steps', 'trace']`
+- raw `trace` keys: `['duration', 'end_time', 'error', 'final_response', 'messages', 'rounds', 'start_time', 'steps', 'task_id', 'total_output_tokens', 'total_prompt_tokens', 'total_steps', 'total_tokens']`
+- cleaned `eval_details` keys: `['benchmark', 'domain', 'execution_time', 'final_response', 'model_name', 'note', 'reward', 'status', 'success', 'task_id', 'task_path', 'test_output', 'test_passed', 'total_rounds', 'total_tokens']`
+- cleaned `trace_meta` keys: `['benchmark', 'domain', 'error', 'task_id', 'task_path', 'total_steps', 'trace']`
+
+## mathhay
+
+- sample id: `mathhay__DeepSeek-R1__3s3d__mathhay_3s3d_000__pass1`
+- raw eval file: `parallel_scaling_results/Deep
+...[+4791 chars]

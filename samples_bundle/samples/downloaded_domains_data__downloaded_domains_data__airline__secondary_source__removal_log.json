@@ -1,0 +1,33 @@
+{
+  "original_total": 10098,
+  "round1_removed": {
+    "count": 329,
+    "criteria": [
+      "empty_trace (0 messages)",
+      "too_many_errors termination (tau2bench)",
+      "crashed_before_first_response (status=error AND <=3 turns)"
+    ],
+    "note": "Recoverable from parallel_scaling_results/ via clean_dataset.py"
+  },
+  "round2_removed": {
+    "count": 228,
+    "criteria": [
+      "truncated trajectory (status=error, ends with tool message, no final assistant response)"
+    ],
+    "saved_to": "removed_truncated.json"
+  },
+  "final_total": 8653,
+  "breakdown": {
+    "tau2bench": 984,
+    "swebench": 747,
+    "terminalbench": 1429,
+    "mathhay": 1324,
+    "search": 3270,
+    "mcpbench": 899
+  },
+  "round3_removed": {
+    "count": 888,
+    "criteria": "Last message role is not assistant (trajectory incomplete, no final answer)",
+    "saved_to": "removed_incomplete.json"
+  }
+}

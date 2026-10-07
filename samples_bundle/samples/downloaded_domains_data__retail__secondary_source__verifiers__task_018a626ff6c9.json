@@ -1,0 +1,526 @@
+{
+  "atoms": [
+    {
+      "description": "modify_user_address writes LUCAS_SANTOS_6600",
+      "id": "w0",
+      "judge": false,
+      "kind": "required",
+      "predicate_src": "wrote('modify_user_address', **{'user_id': 'lucas_santos_6600'})",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "b12aae21-5aca-404d-8487-0a44f3ef58f9",
+          "msg_index": 18,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "at": 18,
+        "entity": "LUCAS_SANTOS_6600",
+        "entity_raw": "lucas_santos_6600",
+        "id_field": "user_id",
+        "kind": "write",
+        "tool": "modify_user_address"
+      }
+    },
+    {
+      "description": "modify_user_address address1 is 943 Maple Drive",
+      "id": "w0.address1",
+      "judge": false,
+      "kind": "required",
+      "predicate_src": "wrote('modify_user_address', **{'user_id': 'lucas_santos_6600', 'address1': '943 Maple Drive'})",
+      "provenance": "user_stated",
+      "spans": [
+        {
+          "file_hash": "b12aae21-5aca-404d-8487-0a44f3ef58f9",
+          "msg_index": 16,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "at": 18,
+        "entity": "LUCAS_SANTOS_6600",
+        "entity_raw": "lucas_santos_6600",
+        "field": "address1",
+        "id_field": "user_id",
+        "kind": "write_value",
+        "raw": "943 Maple Drive",
+        "tool": "modify_user_address",
+        "value": "\"943 maple drive\""
+      }
+    },
+    {
+      "description": "modify_user_address address2 is Suite 356",
+      "id": "w0.address2",
+      "judge": false,
+      "kind": "required",
+      "predicate_src": "wrote('modify_user_address', **{'user_id': 'lucas_santos_6600', 'address2': 'Suite 356'})",
+      "provenance": "user_stated",
+      "spans": [
+        {
+          "file_hash": "b12aae21-5aca-404d-8487-0a44f3ef58f9",
+          "msg_index": 16,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "at": 18,
+        "entity": "LUCAS_SANTOS_6600",
+        "entity_raw": "lucas_santos_6600",
+        "field": "address2",
+        "id_field": "user_id",
+        "kind": "write_value",
+        "raw": "Suite 356",
+        "tool": "modify_user_address",
+        "value": "\"suite 356\""
+      }
+    },
+    {
+      "description": "modify_user_address city is Chicago",
+      "id": "w0.city",
+      "judge": false,
+      "kind": "allowed",
+      "predicate_src": "wrote('modify_user_address', **{'user_id': 'lucas_santos_6600', 'city': 'Chicago'})",
+      "provenance": "user_elicited",
+      "spans": [
+        {
+          "file_hash": "b12aae21-5aca-404d-8487-0a44f3ef58f9",
+          "msg_index": 1,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "at": 18,
+        "entity": "LUCAS_SANTOS_6600",
+        "entity_raw": "lucas_santos_6600",
+        "field": "city",
+        "id_field": "user_id",
+        "kind": "write_value",
+        "raw": "Chicago",
+        "tool": "modify_user_address",
+        "value": "\"chicago\""
+      }
+    },
+    {
+      "description": "modify_user_address writes under country a value this Run read for itself",
+      "id": "w0.country",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+5852 chars]",
+      "provenance": null,
+      "spans": [],
+      "target": {
+        "constraint_id": "w0.country",
+        "derived_as": "shape",
+        "field": "country",
+        "id_field": "user_id",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "\n_TOOL = 'modify_user_address'\n_FIELD = 'country'\n_ID_FIELD = 'user_id'\n_SOURCES = ('own_row', 'no_column')\n\n\ndef _names(field):\n    return [field, field[:-1]] if field.endswith(\"s\") else [field]\n\n\ndef _under(node, field):\n    \"\"\"Every scalar this part of the world holds under one of these column names, canonical.\n\n    An empty column holds nothing: a row that names the column and has nothing in it is a row the\n    shape has no value to demand, not a row demanding the word null. A row seeded before the write\n    it is about carries every column empty, and reading those as values asked the Run to write the\n    emptiness back.\n    \"\"\"\n    wanted = _names(field)\n    out = []\n    stack = [node]\n    while stack:\n        item = stack.pop()\n        if isinstance(item, dict):\n            for name, value in item.items():\n                if name in wanted and not isinstance(value, (dict, list, tuple)):\n                    if value is not None and value != \"\":\n                        out.append(str(canon(value)))\n                else:\n                    stack.append(value)\n        elif isinstance(item, (list, tuple)):\n            for value in item:\n                stack.append(value)\n    return out\n\n\ndef _row(state, id_field, id_value):\n    \"\"\"The part of the Starting state the write's own id names: a row keyed by it, or one holding it.\"\"\"\n    want = str(canon(id_value))\n    stack = [state]\n    while stack:\n        item = stack.pop()\n        if isinstance(item, dict):\n            if id_field in item and str(canon(item.get(id_field))) == want:\n                return item\n            for name, value in item.items():\n                if str(canon(name)) == want and isinstance(value, (dict, list)):\n                    return value\n                stack.append(value)\n        elif isinstance(item, (list, tuple)):\n            for value in item:\n                stack.append(value)\n    return None\n\n\ndef _results(transcript):\n    \"\"\"Every result the Run received before this write, in order.\"\"\"\n    return [turn.get(\"result\") for turn in transcript or [] if turn.get(\"role\") == \"tool\"]\n\n\ndef _read_before(transcript, field):\n    \"\"\"Every value the Run was handed under this column, by any call, before this write.\"\"\"\n    out = []\n    for result in _results(transcript):\n        out.extend(_under(result, field))\n    return out\n\n\ndef _stated_before(transcript, value):\n    \"\"\"Did a prose result state this value as a token? The reader's answer is text, not a column.\"\"\"\n    for result in ...[+1285 chars]",
+        "read_tools": [],
+        "shape_source": "own_row",
+        "tool": "modify_user_address",
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items",
+          "transfer_to_human_agents"
+        ]
+      }
+    },
+    {
+      "description": "modify_user_address state is IL",
+      "id": "w0.state",
+      "judge": false,
+      "kind": "required",
+      "predicate_src": "wrote('modify_user_address', **{'user_id': 'lucas_santos_6600', 'state': 'IL'})",
+      "provenance": "user_stated",
+      "spans": [
+        {
+          "file_hash": "b12aae21-5aca-404d-8487-0a44f3ef58f9",
+          "msg_index": 16,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "at": 18,
+        "entity": "LUCAS_SANTOS_6600",
+        "entity_raw": "lucas_santos_6600",
+        "field": "state",
+        "id_field": "user_id",
+        "kind": "write_value",
+        "raw": "IL",
+        "tool": "modify_user_address",
+        "value": "\"il\""
+      }
+    },
+    {
+      "description": "modify_user_address writes under user_id a value this Run read for itself",
+      "id": "w0.user_id",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+5852 chars]",
+      "provenance": null,
+      "spans": [],
+      "target": {
+        "constraint_id": "w0.user_id",
+        "derived_as": "shape",
+        "field": "user_id",
+        "id_field": "user_id",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "\n_TOOL = 'modify_user_address'\n_FIELD = 'user_id'\n_ID_FIELD = 'user_id'\n_SOURCES = ('own_row', 'no_column')\n\n\ndef _names(field):\n    return [field, field[:-1]] if field.endswith(\"s\") else [field]\n\n\ndef _under(node, field):\n    \"\"\"Every scalar this part of the world holds under one of these column names, canonical.\n\n    An empty column holds nothing: a row that names the column and has nothing in it is a row the\n    shape has no value to demand, not a row demanding the word null. A row seeded before the write\n    it is about carries every column empty, and reading those as values asked the Run to write the\n    emptiness back.\n    \"\"\"\n    wanted = _names(field)\n    out = []\n    stack = [node]\n    while stack:\n        item = stack.pop()\n        if isinstance(item, dict):\n            for name, value in item.items():\n                if name in wanted and not isinstance(value, (dict, list, tuple)):\n                    if value is not None and value != \"\":\n                        out.append(str(canon(value)))\n                else:\n                    stack.append(value)\n        elif isinstance(item, (list, tuple)):\n            for value in item:\n                stack.append(value)\n    return out\n\n\ndef _row(state, id_field, id_value):\n    \"\"\"The part of the Starting state the write's own id names: a row keyed by it, or one holding it.\"\"\"\n    want = str(canon(id_value))\n    stack = [state]\n    while stack:\n        item = stack.pop()\n        if isinstance(item, dict):\n            if id_field in item and str(canon(item.get(id_field))) == want:\n                return item\n            for name, value in item.items():\n                if str(canon(name)) == want and isinstance(value, (dict, list)):\n                    return value\n                stack.append(value)\n        elif isinstance(item, (list, tuple)):\n            for value in item:\n                stack.append(value)\n    return None\n\n\ndef _results(transcript):\n    \"\"\"Every result the Run received before this write, in order.\"\"\"\n    return [turn.get(\"result\") for turn in transcript or [] if turn.get(\"role\") == \"tool\"]\n\n\ndef _read_before(transcript, field):\n    \"\"\"Every value the Run was handed under this column, by any call, before this write.\"\"\"\n    out = []\n    for result in _results(transcript):\n        out.extend(_under(result, field))\n    return out\n\n\ndef _stated_before(transcript, value):\n    \"\"\"Did a prose result state this value as a token? The reader's answer is text, not a column.\"\"\"\n    for result in ...[+1285 chars]",
+        "read_tools": [],
+        "shape_source": "own_row",
+        "tool": "modify_user_address",
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items",
+          "transfer_to_human_agents"
+        ]
+      }
+    },
+    {
+      "description": "modify_user_address zip is 60621",
+      "id": "w0.zip",
+      "judge": false,
+      "kind": "required",
+      "predicate_src": "wrote('modify_user_address', **{'user_id': 'lucas_santos_6600', 'zip': '60621'})",
+      "provenance": "user_stated",
+      "spans": [
+        {
+          "file_hash": "b12aae21-5aca-404d-8487-0a44f3ef58f9",
+          "msg_index": 16,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "at": 18,
+        "entity": "LUCAS_SANTOS_6600",
+        "entity_raw": "lucas_santos_6600",
+        "field": "zip",
+        "id_field": "user_id",
+        "kind": "write_value",
+        "raw": "60621",
+        "tool": "modify_user_address",
+        "value": "\"60621\""
+      }
+    },
+    {
+      "description": "the final answer may state 237; the request did not ask the agent about it, so it is reported and rejects no Run",
+      "id": "c0",
+      "judge": false,
+      "kind": "allowed",
+      "predicate_src": "communicated('237')",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "b12aae21-5aca-404d-8487-0a44f3ef58f9",
+          "msg_index": 9,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "field": null,
+        "generic": "a fragment of a longer value, not the whole value of any field",
+        "kind": "communicate_reported",
+        "source_tool": "get_user_details",
+        "text": "237",
+        "value": "\"237\""
+      }
+    },
+    {
+      "description": "the final answer may state 356; the request did not ask the agent about it, so it is reported and rejects no Run",
+      "id": "c1",
+      "judge": false,
+      "kind": "allowed",
+      "predicate_src": "communicated('356')",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "b12aae21-5aca-404d-8487-0a44f3ef58f9",
+          "msg_index": 14,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "field": null,
+        "generic": "a fragment of a longer value, not the whole value of any field",
+        "kind": "communicate_reported",
+        "source_tool": "get_order_details",
+        "text": "356",
+        "value": "\"356\""
+      }
+    },
+    {
+      "description": "the final answer may state 60; the request did not ask the agent about it, so it is reported and rejects no Run",
+      "id": "c2",
+      "judge": false,
+      "kind": "allowed",
+      "predicate_src": "communicated('60')",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "b12aae21-5aca-404d-8487-0a44f3ef58f9",
+          "msg_index": 14,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "field": null,
+        "generic": "a fragment of a longer value, not the whole value of any field",
+        "kind": "communicate_reported",
+        "source_tool": "get_order_details",
+        "text": "60",
+        "value": "\"60\""
+      }
+    },
+    {
+      "description": "the final answer may state 943; the request did not ask the agent about it, so it is reported and rejects no Run",
+      "id": "c3",
+      "judge": false,
+      "kind": "allowed",
+      "predicate_src": "communicated('943')",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "b12aae21-5aca-404d-8487-0a44f3ef58f9",
+          "msg_index": 14,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "field": null,
+        "generic": "a fragment of a longer value, not the whole value of any field",
+        "kind": "communicate_reported",
+        "source_tool": "get_order_details",
+        "text": "943",
+        "value": "\"943\""
+      }
+    },
+    {
+      "description": "the final answer may state 986; the request did not ask the agent about it, so it is reported and rejects no Run",
+      "id": "c4",
+      "judge": false,
+      "kind": "allowed",
+      "predicate_src": "communicated('986')",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "b12aae21-5aca-404d-8487-0a44f3ef58f9",
+          "msg_index": 9,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "field": null,
+        "generic": "a fragment of a longer value, not the whole value of any field",
+        "kind": "communicate_reported",
+        "source_tool": "get_user_details",
+        "text": "986",
+        "value": "\"986\""
+      }
+    },
+    {
+      "description": "the final answer states 60621, which the request asked the agent about",
+      "id": "c5",
+      "judge": false,
+      "kind": "communicate",
+      "predicate_src": "communicated('60621')",
+      "provenance": "user_stated",
+      "spans": [
+        {
+          "file_hash": "b12aae21-5aca-404d-8487-0a44f3ef58f9",
+          "msg_index": 14,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "field": "address.zip",
+        "kind": "communicate",
+        "source_tool": "get_order_details",
+        "text": "60621",
+        "value": "\"60621\""
+      }
+    },
+    {
+      "description": "the final answer states 80239, which the request asked the agent about",
+      "id": "c6",
+      "judge": false,
+      "kind": "communicate",
+      "predicate_src": "communicated('80239')",
+      "provenance": "user_stated",
+      "spans": [
+        {
+          "file_hash": "b12aae21-5aca-404d-8487-0a44f3ef58f9",
+          "msg_index": 9,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "field": "address.zip",
+        "kind": "communicate",
+        "source_tool": "get_user_details",
+        "text": "80239",
+        "value": "\"80239\""
+      }
+    },
+    {
+      "description": "the final answer states 840887978435, which the request asked the agent about",
+      "id": "c7",
+      "judge": false,
+      "kind": "communicate",
+      "predicate_src": "communicated('840887978435')",
+      "provenance": "user_stated",
+      "spans": [
+        {
+          "file_hash": "b12aae21-5aca-404d-8487-0a44f3ef58f9",
+          "msg_index": 14,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "field": "fulfillments.tracking_id",
+        "kind": "communicate",
+        "source_tool": "get_order_details",
+        "text": "840887978435",
+        "value": "\"840887978435\""
+      }
+    },
+    {
+      "description": "the final answer may state 4K; the request did not ask the agent about it, so it is reported and rejects no Run",
+      "id": "c8",
+      "judge": false,
+      "kind": "allowed",
+      "predicate_src": "communicated('4K')",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "b12aae21-5aca-404d-8487-0a44f3ef58f9",
+          "msg_index": 14,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "field": "items.options.resolution",
+        "kind": "communicate_reported",
+        "source_tool": "get_order_details",
+        "text": "4K",
+        "value": "\"4k\""
+      }
+    },
+    {
+      "description": "the final answer may state 8-inch; the request did not ask the agent about it, so it is reported and rejects no Run",
+      "id": "c9",
+      "judge": false,
+      "kind": "allowed",
+      "predicate_src": "communicated('8-inch')",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "b12aae21-5aca-404d-8487-0a44f3ef58f9",
+          "msg_index": 14,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "field": "items.options.screen size",
+        "kind": "communicate_reported",
+        "source_tool": "get_order_details",
+        "text": "8-inch",
+        "value": "\"8-inch\""
+      }
+    },
+    {
+      "description": "the final answer states 64GB, which the request asked the agent about",
+      "id": "c10",
+      "judge": false,
+      "kind": "communicate",
+      "predicate_src": "communicated('64GB')",
+      "provenance": "system_derived",
+      "spans": [
+        {
+          "file_hash": "b12aae21-5aca-404d-8487-0a44f3ef58f9",
+          "msg_index": 14,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "field": "items.options.storage",
+        "kind": "communicate",
+        "source_tool": "get_order_details",
+        "text": "64GB",
+        "value": "\"64gb\""
+      }
+    },
+    {
+      "description": "the final answer may state #W7895761; the request did not ask the agent about it, so it is reported and rejects no Run",
+      "id": "c11",
+      "judge": false,
+      "kind": "allowed",
+      "predicate_src": "communicated('#W7895761')",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "b12aae21-5aca-404d-8487-0a44f3ef58f9",
+          "msg_index": 9,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "field": "orders",
+        "kind": "communicate_reported",
+        "source_tool": "get_user_details",
+        "text": "#W7895761",
+        "value": "\"#W7895761\""
+      }
+    },
+    {
+      "description": "the Run makes at most 1 write calls",
+      "id": "entity_count",
+      "judge": false,
+      "kind": "required",
+      "predicate_src": "writes_count() <= 1",
+      "provenance": null,
+      "spans": [],
+      "target": {
+        "count": 1,
+        "kind": "entity_count"
+      }
+    }
+  ],
+  "seed_run_ids": [
+    "replay-b12aae21-5aca-404d-8487-0a44f3ef58f9",
+    "second-path-r0-b1-task_018a626ff6c9-0",
+    "second-path-r0-b1-task_018a626ff6c9-1"
+  ],
+  "task_id": "task_018a626ff6c9",
+  "verifier_version": "1"
+}

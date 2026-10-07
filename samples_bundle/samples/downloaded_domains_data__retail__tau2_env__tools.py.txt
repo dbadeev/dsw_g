@@ -1,0 +1,181 @@
+"""Toolkit for the retail domain."""
+
+import json
+from typing import List
+
+from tau2.domains.retail.data_model import (
+    GiftCard,
+    Order,
+    OrderPayment,
+    PaymentMethod,
+    Product,
+    RetailDB,
+    User,
+    UserAddress,
+    Variant,
+)
+from tau2.domains.retail.utils import RETAIL_DB_PATH
+from tau2.environment.toolkit import ToolKitBase, ToolType, is_tool
+
+
+class RetailTools(ToolKitBase):  # Tools
+    """All the tools for the retail domain."""
+
+    db: RetailDB
+
+    def __init__(self, db: RetailDB) -> None:
+        super().__init__(db)
+
+    def _get_order(self, order_id: str) -> Order:
+        """Get the order from the database.
+
+        Args:
+            order_id: The order id, such as '#W0000000'. Be careful there is a '#' symbol at the beginning of the order id.
+
+        Returns:
+            The order.
+
+        Raises:
+            ValueError: If the order is not found.
+        """
+        if order_id not in self.db.orders:
+            raise ValueError("Order not found")
+        return self.db.orders[order_id]
+
+    def _get_user(self, user_id: str) -> User:
+        """Get the user from the database.
+
+        Args:
+            user_id: The user id, such as 'sara_doe_496'.
+
+        Returns:
+            The user.
+
+        Raises:
+            ValueError: If the user is not found.
+        """
+        if user_id not in self.db.users:
+            raise ValueError("User not found")
+        return self.db.users[user_id]
+
+    def _get_product(self, product_id: str) -> Product:
+        """Get the product from the database.
+
+        Args:
+            product_id: The product id, such as '6086499569'. Be careful the product id is different from the item id.
+
+        Returns:
+            The product.
+
+        Raises:
+            ValueError: If the product is not found.
+        """
+        if product_id not in self.db.products:
+            raise ValueError("Product not found")
+        return self.db.products[product_id]
+
+    def _get_item(self, item_id: str) -> Variant:
+        """Get the item from the database.
+
+        Args:
+            item_id: The item id, such as '6086499569'. Be careful the item id is different from the product id.
+
+        Returns:
+            The item.
+
+        Raises:
+            ValueError: If the item is not found.
+        """
+        for _, product in self.db.products.items():
+            if item_id in product.variants:
+                return product.variants[item_id]
+
+        raise ValueError("Item not found")
+
+    def _get_variant(self, product_id: str, variant_id: str) -> Variant:
+        """Get the variant from the database.
+
+        Args:
+            product_id: The product id, such as '6086499569'. Be careful the product id is different from the item id.
+            variant_id: The variant id, such as '1008292230'.
+
+        Returns:
+            The variant.
+
+        Raises:
+            ValueError: If the variant is not found.
+        """
+        product = self._get_product(product_id)
+        if variant_id not in product.variants:
+            raise ValueError("Variant not found")
+        return product.variants[variant_id]
+
+    def _get_payment_method(
+        self, user_id: str, payment_method_id: str
+    ) -> PaymentMethod:
+        """Get the payment method from the database.
+
+        Args:
+            payment_method_id: The payment method id, such as 'gift_card_0000000' or 'credit_card_0000000'.
+
+        Returns:
+            The payment method.
+
+        Raises:
+            ValueError: If the payment method is not found.
+        """
+        user = self._get_user(user_id)
+        if payment_method_id not in user.payment_methods:
+            raise ValueError("Payment method not found")
+        return user.payment_methods[payment_method_id]
+
+    def _is_pending_order(self, order: Order) -> bool:
+        """Check if the order is pending. This is not a strict check, and not meant to be used for modify_items in pending orders.
+
+        Args:
+            order: The order.
+        """
+        return "pending" in order.status
+
+    @is_tool(ToolType.GENERIC)
+    def calculate(self, expression: str) -> str:
+        """
+        Calculate the result of a mathematical expression.
+
+        Args:
+            expression: The mathematical expression to calculate, such as '2 + 2'. The expression can contain numbers, operators (+, -, *, /), parentheses, and spaces.
+
+        Returns:
+            The result of the mathematical expression.
+
+        Raises:
+            ValueError: If the expression is invalid.
+        """
+        if not all(char in "0123456789+-*/(). " for char in expression):
+            raise ValueError("Invalid characters in expression")
+        return str(round(float(eval(expression, {"__builtins__": None}, {})), 2))
+
+    @is_tool(ToolType.WRITE)
+    def cancel_pending_order(self, order_id: str, reason: str) -> Order:
+        """Cancel a pending order. If the order is already processed or delivered,
+        it cannot be cancelled. The agent needs to explain the cancellation detail
+        and ask for explicit user confirmation (yes/no) to proceed. If the user confirms,
+        the order status will be changed to 'cancelled' and the payment will be refunded.
+        The refund will be added to the user's gift card balance immediately if the payment
+        was made using a gift card, otherwise the refund would take 5-7 business days to process.
+        The function returns the order details after the cancellation.
+
+        Args:
+            order_id: The order id, such as '#W0000000'. Be careful there is a '#' symbol at the beginning of the order id.
+            reason: The reason for cancellation, which should be either 'no longer needed' or 'ordered by mistake'.
+
+        Returns:
+            Order: The order details after the cancellation.
+        """
+        # check order exists and is pending
+        order = self._get_order(order_id)
+        if order.status != "pending":
+            raise ValueError("Non-pending order cannot be cancelled")
+
+        # 
+...[+23202 chars]

@@ -1,0 +1,118 @@
+[
+  {
+    "id": "tau2bench__DeepSeek-R1__airline__4__pass1",
+    "benchmark": "tau2bench",
+    "source_model": "DeepSeek-R1",
+    "cleaning_info": [
+      {
+        "message_index": 6,
+        "role": "user",
+        "removals": [
+          {
+            "type": "reasoning",
+            "start": 58,
+            "end": 114,
+            "length": 56
+          },
+          {
+            "type": "reasoning",
+            "start": 117,
+            "end": 620,
+            "length": 503
+          },
+          {
+            "type": "tool_response",
+            "start": 61,
+            "end": 638,
+            "length": 577
+          }
+        ],
+        "original_length": 1197,
+        "cleaned_length": 61
+      },
+      {
+        "message_index": 8,
+        "role": "user",
+        "removals": [
+          {
+            "type": "tool_response",
+            "start": 0,
+            "end": 263,
+            "length": 263
+          }
+        ],
+        "original_length": 263,
+        "cleaned_length": 0
+      }
+    ]
+  },
+  {
+    "id": "tau2bench__DeepSeek-R1__retail__46__pass1",
+    "benchmark": "tau2bench",
+    "source_model": "DeepSeek-R1",
+    "cleaning_info": [
+      {
+        "message_index": 8,
+        "role": "user",
+        "removals": [
+          {
+            "type": "reasoning",
+            "start": 52,
+            "end": 116,
+            "length": 64
+          },
+          {
+            "type": "reasoning",
+            "start": 119,
+            "end": 229,
+            "length": 110
+          },
+          {
+            "type": "reasoning",
+            "start": 232,
+            "end": 286,
+            "length": 54
+          },
+          {
+            "type": "reasoning",
+            "start": 289,
+            "end": 719,
+            "length": 430
+          },
+          {
+            "type": "reasoning",
+            "start": 1107,
+            "end": 1191,
+            "length": 84
+          },
+          {
+            "type": "reasoning",
+            "start": 1194,
+            "end": 1246,
+            "length": 52
+          },
+          {
+            "type": "reasoning",
+            "start": 1249,
+            "end": 1413,
+            "length": 164
+          },
+          {
+            "type": "reasoning",
+            "start": 1416,
+            "end": 1459,
+            "length": 43
+          },
+          {
+            "type": "reasoning",
+            "start": 1462,
+            "end": 1884,
+            "length": 422
+          }
+        ],
+        "original_length": 2285,
+        "cleaned_length": 862
+      }
+    ]
+  }
+]

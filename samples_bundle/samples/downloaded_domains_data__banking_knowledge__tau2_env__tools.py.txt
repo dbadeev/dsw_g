@@ -1,0 +1,189 @@
+"""Tools for the knowledge domain."""
+
+import inspect
+import json
+import re
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, get_args
+
+from tau2.domains.banking_knowledge.data_model import TransactionalDB
+from tau2.domains.banking_knowledge.db_query import (
+    add_to_db,
+    query_database_tool,
+    query_db,
+    update_record_in_db,
+)
+from tau2.domains.banking_knowledge.utils import (
+    _deterministic_id,
+    generate_account_flag_id,
+    generate_agent_discoverable_tool_id,
+    generate_application_id,
+    generate_closure_reason_id,
+    generate_credit_card_order_id,
+    generate_credit_limit_increase_request_id,
+    generate_debit_card_id,
+    generate_debit_card_order_id,
+    generate_dispute_id,
+    generate_referral_id,
+    generate_referral_link_id,
+    generate_transaction_id,
+    generate_user_discoverable_tool_call_id,
+    generate_user_discoverable_tool_id,
+    generate_verification_id,
+    get_now,
+    get_today_str,
+)
+from tau2.environment.toolkit import (
+    DISCOVERABLE_ATTR,
+    MUTATES_STATE_ATTR,
+    ToolKitBase,
+    ToolType,
+    is_discoverable_tool,
+    is_tool,
+)
+
+if TYPE_CHECKING:
+    pass
+
+
+TransferReasonLiteral = Literal[
+    "fraud_or_security_concern",
+    "account_closure_request",
+    "deceased_account_holder",
+    "legal_or_regulatory_matter",
+    "account_ownership_dispute",
+    "complex_billing_dispute",
+    "abusive_customer_behavior",
+    "third_party_inquiry",
+    "technical_system_error",
+    "unconfirmed_external_communication",
+    "customer_demands_after_unavailable_offer_refusal",
+    "kb_search_unsuccessful_customer_requests_transfer",
+    "specialized_department_required",
+    "accessibility_or_special_needs",
+    "customer_frustrated_demands_human",
+    "supervisor_request_service_complaint",
+    "customer_requests_human_no_specific_reason",
+    "request_completed_customer_wants_human_followup",
+    # Tier 4
+    "other",
+]
+
+
+# =============================================================================
+# Helper functions for discoverable tools
+# =============================================================================
+
+
+def _parse_balance(val: Any) -> float:
+    """Parse a balance value that may be a number or a string like '$2,850.00'."""
+    if isinstance(val, (int, float)):
+        return float(val)
+    if isinstance(val, str):
+        return float(val.replace("$", "").replace(",", ""))
+    return 0.0
+
+
+def _get_account_balance(account: Dict[str, Any]) -> float:
+    """Get account balance from either 'current_holdings' or 'balance' field."""
+    return _parse_balance(account.get("current_holdings", account.get("balance", 0)))
+
+
+def parse_discoverable_tool_docstring(func) -> Dict[str, Any]:
+    """Parse a discoverable tool's docstring into description and parameters.
+
+    Expected docstring format:
+    ```
+    Short description of the tool.
+
+    Args:
+        param_name (type): Description of the parameter
+        another_param (type, optional): Optional parameter description
+
+    Returns:
+        Description of return value (used as success_message hint)
+    ```
+
+    Args:
+        func: The decorated function to parse
+
+    Returns:
+        Dictionary with 'description', 'parameters', and optionally 'success_message'
+    """
+    docstring = inspect.getdoc(func) or ""
+
+    # Split into sections
+    parts = re.split(r"\n\s*Args:\s*\n", docstring, maxsplit=1)
+    description = parts[0].strip()
+
+    parameters = {}
+    success_message = "Action completed successfully."
+
+    if len(parts) > 1:
+        remaining = parts[1]
+
+        # Check if there's a Returns section
+        returns_split = re.split(r"\n\s*Returns:\s*\n", remaining, maxsplit=1)
+        args_section = returns_split[0]
+
+        if len(returns_split) > 1:
+            # Use the Returns section as success message hint
+            returns_text = returns_split[1].strip()
+            # Take first line/paragraph as success message
+            success_message = returns_text.split("\n")[0].strip()
+
+        # Parse each arg line: "param_name (type): description" or "param_name (type, optional): description"
+        # Also handle simple format: "param_name: description"
+        arg_pattern = re.compile(
+            r"^\s*(\w+)\s*"  # param name
+            r"(?:\(([^)]+)\))?\s*"  # optional (type) or (type, optional)
+            r":\s*(.+?)$",  # description
+            re.MULTILINE,
+        )
+
+        for match in arg_pattern.finditer(args_section):
+            param_name = match.group(1)
+            type_info = match.group(2) or "string"
+            param_desc = match.group(3).strip()
+
+            # Check if optional
+            is_optional = "optional" in type_info.lower()
+            # Extract just the type (remove 'optional' if present)
+            param_type = re.sub(
+                r",?\s*optional", "", type_info, flags=re.IGNORECASE
+            ).strip()
+            if not param_type:
+                param_type = "string"
+
+            parameters[param_name] = {
+                "type": param_type,
+                "description": param_desc,
+                "required": not is_optional,
+            }
+
+    return {
+        "name": func.__name__,
+        "description": description,
+        "parameters": parameters,
+        "success_message": success_message,
+    }
+
+
+def format_discoverable_tool_for_agent(tool_info: Dict[str, Any]) -> str:
+    """Format a discoverable tool's info for display to the agent.
+
+    Produces output matching the original AgentDiscoverableToolDefinition.format_for_agent().
+
+    Args:
+        tool_info: Dictionary from parse_discoverable_tool_docstring()
+
+    Returns:
+        Formatted string for agent display
+    """
+    param_strs = []
+    for param_name, param_def in tool_info.get("parameters", {}).items():
+        required = param_def.get("required", True)
+        param_type = param_def.get("type", "string")
+        desc = param_def.get("description", "")
+        req_str = " (required)" if required else " (optional)"
+        param_s
+...[+183255 chars]

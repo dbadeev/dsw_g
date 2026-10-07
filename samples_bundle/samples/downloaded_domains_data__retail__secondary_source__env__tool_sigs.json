@@ -1,0 +1,354 @@
+[
+  {
+    "args_fields": [
+      {
+        "count": 33,
+        "declared": false,
+        "first_seen": "079cf9b3-d7c9-438e-a87a-a3697ac47b23",
+        "last_seen": "f366894a-5a7e-4061-bd5e-61fac3da511f",
+        "name": "expression",
+        "optional": false,
+        "types": [
+          "str"
+        ]
+      }
+    ],
+    "args_schema": {
+      "properties": {
+        "expression": {
+          "type": [
+            "str"
+          ]
+        }
+      },
+      "required": [
+        "expression"
+      ],
+      "type": "object"
+    },
+    "callers": [
+      "assistant"
+    ],
+    "classified_by": "rule",
+    "description": null,
+    "effects_observed": [],
+    "error_shapes": [],
+    "evidence": [
+      "079cf9b3-d7c9-438e-a87a-a3697ac47b23",
+      "2df1bf0f-aa28-43da-bc31-66288c7c6816",
+      "fd94ab9d-1851-4857-b732-ca05807e88a3",
+      "83e3dde7-222f-47b5-b372-4d62f9d4e3b7",
+      "dde4284b-eeb3-43e9-a7fc-e8827167c940",
+      "5e24ecf3-f158-447d-bdbf-0886a64aa19d",
+      "cacaf139-09e7-4d31-8f32-8748d51fba59",
+      "13875336-5ac2-4f14-a9f7-d0f911dff139",
+      "f51c3f53-153a-4dbf-a43b-b71ddea13faa",
+      "c7f54421-20ef-42ac-aad1-3bec5a8d84ea",
+      "525e2d48-80fc-47e5-9d43-b0fe41fad44c",
+      "2796fbd6-1a2b-45bc-831d-5c7b0e0e4c35",
+      "594e081d-0bf7-41d4-accc-8c17e66d76f6",
+      "d0bf11ec-9c2f-4e97-8a4b-d1d6a3e0bbd0",
+      "b5f724ee-13f7-44c0-8608-03059137eda7",
+      "cb1cb541-7314-40bd-bbd4-78a697969a68",
+      "e8bc70dc-3cd6-49dc-9fda-2d955db11587",
+      "b321410b-554f-4dff-a612-b79e940656a0",
+      "367e7b9d-0512-45c3-a785-4c8f7ed425ec",
+      "746cbb0c-7a7a-4b2f-9aa9-325ff650d0cb",
+      "b6654b05-c74c-47d8-adf9-1d0bf510f89b",
+      "84b1baa0-ddc7-4ff7-8ad7-b1d99f9865aa",
+      "1495db17-aadf-49ec-8884-bb841a74c29f",
+      "251c2ce8-8f3b-4300-b389-696b7e9df8b5",
+      "f40c28fa-80bd-40a8-b377-8bd167eba532",
+      "af9889a2-59b6-4084-93db-0d92b790db8a",
+      "f366894a-5a7e-4061-bd5e-61fac3da511f"
+    ],
+    "evidence_strength": {
+      "call_count": 33,
+      "error_count": 0,
+      "trace_count": 27
+    },
+    "kind": "generic",
+    "kind_confidence": "medium",
+    "kind_reason": "the name reads as a calculation or a handoff to a person, which reads nothing of the world and changes nothing in it; basis: name, no supporting calls",
+    "name": "calculate",
+    "refused_callers": [],
+    "result_schema": [
+      {
+        "count": 33,
+        "declared": false,
+        "first_seen": "079cf9b3-d7c9-438e-a87a-a3697ac47b23",
+        "last_seen": "f366894a-5a7e-4061-bd5e-61fac3da511f",
+        "name": "$scalar",
+        "optional": false,
+        "types": [
+          "str"
+        ]
+      }
+    ],
+    "source": "observed",
+    "unclassified": false
+  },
+  {
+    "args_fields": [
+      {
+        "count": 78,
+        "declared": false,
+        "first_seen": "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+        "last_seen": "9c337890-cd71-4348-94be-a1a832a65e52",
+        "name": "order_id",
+        "optional": false,
+        "types": [
+          "str"
+        ]
+      },
+      {
+        "count": 78,
+        "declared": false,
+        "first_seen": "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+        "last_seen": "9c337890-cd71-4348-94be-a1a832a65e52",
+        "name": "reason",
+        "optional": false,
+        "types": [
+          "str"
+        ]
+      }
+    ],
+    "args_schema": {
+      "properties": {
+        "order_id": {
+          "type": [
+            "str"
+          ]
+        },
+        "reason": {
+          "type": [
+            "str"
+          ]
+        }
+      },
+      "required": [
+        "order_id",
+        "reason"
+      ],
+      "type": "object"
+    },
+    "callers": [
+      "assistant"
+    ],
+    "classified_by": "rule",
+    "description": null,
+    "effects_observed": [],
+    "error_shapes": [],
+    "evidence": [
+      "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+      "9538682b-bef9-4b8f-abc3-795c56332c1d",
+      "2a7b685b-d0b5-4973-a44a-c4f1604942ca",
+      "079cf9b3-d7c9-438e-a87a-a3697ac47b23",
+      "e1abea4d-40bf-4bf6-8628-d839258226da",
+      "97ad7ca6-0e4b-4bbb-a146-b7dc0a5df9fc",
+      "e8c054f4-79a9-4d76-837e-702eb4c08cca",
+      "dc3ef585-ffa0-48f4-a6c7-602ec5d48019",
+      "a7f5e6e6-be0b-42ad-9c87-3cd18236d34e",
+      "e5a85526-1050-4148-a84f-914a678c43a8",
+      "086b19c9-0244-46d4-b315-8c59fbc63301",
+      "7a681e91-6db4-4400-a89d-1adebc36e669",
+      "610eddba-6c4f-436f-b2d2-954d804c6d9c",
+      "15e3c257-1841-42c0-b440-f6b99a20f231",
+      "54748991-2304-48cc-a8fe-07e7cc781a6c",
+      "f903fdc7-c100-4caf-b0ca-c29360b46ad6",
+      "174cc890-ff20-4b87-9d1e-176297b6719d",
+      "281cc608-8938-49cd-a753-e8fa367ba295",
+      "513d6408-4d5f-47f8-9370-517988af2720",
+      "a8f8be35-6f1a-4daa-b08c-3c13bba685a4",
+      "6a68441e-37d0-48c3-aab1-026df09fadb5",
+      "3cb0b1f9-31cb-42d8-812e-dc957174457f",
+      "b8c7d363-e464-433d-91f3-4bc93c04fff1",
+      "0e3aa446-201e-40bd-a100-0cb65b0e1d91",
+      "0317e4c5-bdc3-4c78-addb-3cf1c751f5cb",
+      "3917c0c7-2372-4fe2-b31d-efa90fad0e24",
+      "eeab485e-8f68-4a6f-883b-d1f03055dafb",
+      "225c093c-2bda-4404-81d4-5a9666618cb0",
+      "5513655a-2b41-48e1-92ea-2aebaa02c888",
+      "ed54c36d-6eba-4f94-84c9-fe94337adf9e",
+      "10d92b60-2e84-44e4-b57f-f5342b86745c",
+      "e8bc70dc-3cd6-49dc-9fda-2d955db11587",
+      "3ab40ba2-79c7-4f6e-a76a-d83789d0c633",
+      "ba00af2e-c0ec-404c-b151-eafc8b4404bd",
+      "857ef307-12c1-4f78-ba44-cb83b294bccd",
+      "c370dd4c-af91-4db2-82e0-74eb9157544f",
+      "126f3f4b-0b9e-4f94-9fcb-709d1da226e9",
+      "de6173c2-0547-49ae-ba19-c2321608ca83",
+      "c9898f96-8eff-4522-8a6b-f53ca283ea87",
+      "48edecc1-c183-4ccf-bda2-2d4425ebb329",
+      "...[+16 items]"
+    ],
+    "evidence_strength": {
+      "call_count": 78,
+      "error_count": 0,
+      "trace_count": 56
+    },
+    "kind": "write",
+    "kind_confidence": "high",
+    "kind_reason": "name prefix 'cancel_' writes; basis: name, no supporting calls",
+    "name": "cancel_pending_order",
+    "refused_callers": [],
+    "result_schema": [
+      {
+        "count": 78,
+        "declared": false,
+        "first_seen": "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+        "last_seen": "9c337890-cd71-4348-94be-a1a832a65e52",
+        "name": "address",
+        "optional": false,
+        "types": [
+          "dict"
+        ]
+      },
+      {
+        "count": 78,
+        "declared": false,
+        "first_seen": "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+        "last_seen": "9c337890-cd71-4348-94be-a1a832a65e52",
+        "name": "cancel_reason",
+        "optional": false,
+        "types": [
+          "str"
+        ]
+      },
+      {
+        "count": 78,
+        "declared": false,
+        "first_seen": "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+        "last_seen": "9c337890-cd71-4348-94be-a1a832a65e52",
+        "name": "exchange_items",
+        "optional": false,
+        "types": [
+          "NoneType"
+        ]
+      },
+      {
+        "count": 78,
+        "declared": false,
+        "first_seen": "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+        "last_seen": "9c337890-cd71-4348-94be-a1a832a65e52",
+        "name": "exchange_new_items",
+        "optional": false,
+        "types": [
+          "NoneType"
+        ]
+      },
+      {
+        "count": 78,
+        "declared": false,
+        "first_seen": "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+        "last_seen": "9c337890-cd71-4348-94be-a1a832a65e52",
+        "name": "exchange_payment_method_id",
+        "optional": false,
+        "types": [
+          "NoneType"
+        ]
+      },
+      {
+        "count": 78,
+        "declared": false,
+        "first_seen": "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+        "last_seen": "9c337890-cd71-4348-94be-a1a832a65e52",
+        "name": "exchange_price_difference",
+        "optional": false,
+        "types": [
+          "NoneType"
+        ]
+      },
+      {
+        "count": 78,
+        "declared": false,
+        "first_seen": "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+        "last_seen": "9c337890-cd71-4348-94be-a1a832a65e52",
+        "name": "fulfillments",
+        "optional": false,
+        "types": [
+          "list"
+        ]
+      },
+      {
+        "count": 78,
+        "declared": false,
+        "first_seen": "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+        "last_seen": "9c337890-cd71-4348-94be-a1a832a65e52",
+        "name": "items",
+        "optional": false,
+        "types": [
+          "list"
+        ]
+      },
+      {
+        "count": 78,
+        "declared": false,
+        "first_seen": "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+        "last_seen": "9c337890-cd71-4348-94be-a1a832a65e52",
+        "name": "order_id",
+        "optional": false,
+        "types": [
+          "str"
+        ]
+      },
+      {
+        "count": 78,
+        "declared": false,
+        "first_seen": "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+        "last_seen": "9c337890-cd71-4348-94be-a1a832a65e52",
+        "name": "payment_history",
+        "optional": false,
+        "types": [
+          "list"
+        ]
+      },
+      {
+        "count": 78,
+        "declared": false,
+        "first_seen": "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+        "last_seen": "9c337890-cd71-4348-94be-a1a832a65e52",
+        "name": "return_items",
+        "optional": false,
+        "types": [
+          "NoneType"
+        ]
+      },
+      {
+        "count": 78,
+        "declared": false,
+        "first_seen": "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+        "last_seen": "9c337890-cd71-4348-94be-a1a832a65e52",
+        "name": "return_payment_method_id",
+        "optional": false,
+        "types": [
+          "NoneType"
+        ]
+      },
+      {
+        "count": 78,
+        "declared": false,
+        "first_seen": "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+        "last_seen": "9c337890-cd71-4348-94be-a1a832a65e52",
+        "name": "status",
+        "optional": false,
+        "types": [
+          "str"
+        ]
+      },
+      {
+        "count": 78,
+        "declared": false,
+        "first_seen": "9365ac4f-c3db-4b93-baad-0c53ee512eb1",
+        "last_seen": "9c337890-cd71-4348-94be-a1a832a65e52",
+        "name": "user_id",
+        "optional": false,
+        "types": [
+          "str"
+        ]
+      }
+    ],
+    "source": "observed",
+    "unclassified": false
+  }
+]

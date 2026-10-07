@@ -1,0 +1,1373 @@
+{
+  "atoms": [
+    {
+      "description": "return_delivered_order_items writes #W9502127",
+      "id": "w0",
+      "judge": false,
+      "kind": "required",
+      "predicate_src": "wrote('return_delivered_order_items', **{'order_id': '#W9502127'})",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "reroll-task_000ffeb205cd-0",
+          "msg_index": 51,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "at": 51,
+        "entity": "#W9502127",
+        "entity_raw": "#W9502127",
+        "id_field": "order_id",
+        "kind": "write",
+        "tool": "return_delivered_order_items"
+      }
+    },
+    {
+      "description": "return_delivered_order_items writes under item_ids a value the world holds there for the row it acts on",
+      "id": "w0.item_ids",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+4167 chars]",
+      "provenance": null,
+      "spans": [],
+      "target": {
+        "constraint_id": "w0.item_ids",
+        "derived_as": "shape",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "\n_TOOL = 'return_delivered_order_items'\n_FIELD = 'item_ids'\n_ID_FIELD = 'order_id'\n\n\ndef _names(field):\n    return [field, field[:-1]] if field.endswith(\"s\") else [field]\n\n\ndef _under(node, field):\n    \"\"\"Every scalar this part of the world holds under one of these column names, canonical.\"\"\"\n    wanted = _names(field)\n    out = []\n    stack = [node]\n    while stack:\n        item = stack.pop()\n        if isinstance(item, dict):\n            for name, value in item.items():\n                if name in wanted and not isinstance(value, (dict, list, tuple)):\n                    out.append(str(canon(value)))\n                else:\n                    stack.append(value)\n        elif isinstance(item, (list, tuple)):\n            for value in item:\n                stack.append(value)\n    return out\n\n\ndef _row(state, id_field, id_value):\n    \"\"\"The part of the Starting state the write's own id names: a row keyed by it, or one holding it.\"\"\"\n    want = str(canon(id_value))\n    stack = [state]\n    while stack:\n        item = stack.pop()\n        if isinstance(item, dict):\n            if id_field in item and str(canon(item.get(id_field))) == want:\n                return item\n            for name, value in item.items():\n                if str(canon(name)) == want and isinstance(value, (dict, list)):\n                    return value\n                stack.append(value)\n        elif isinstance(item, (list, tuple)):\n            for value in item:\n                stack.append(value)\n    return None\n\n\ndef check(pre_state, write_call, transcript):\n    if write_call.get(\"name\") != _TOOL:\n        return True\n    args = write_call.get(\"arguments\") or {}\n    if _FIELD not in args:\n        return True\n    value = args[_FIELD]\n    if value is None or value == \"\" or value == [] or value == {}:\n        return False\n    row = _row(pre_state, _ID_FIELD, args.get(_ID_FIELD)) if _ID_FIELD in args else None\n    known = _under(row, _FIELD) if row is not None else []\n    if not known:\n        return True\n    parts = value if isinstance(value, (list, tuple)) else [value]\n    return all(str(canon(part)) in known for part in parts)\n",
+        "read_tools": [],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "return_delivered_order_items writes under order_id a value the world holds there for the row it acts on",
+      "id": "w0.order_id",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+4167 chars]",
+      "provenance": null,
+      "spans": [],
+      "target": {
+        "constraint_id": "w0.order_id",
+        "derived_as": "shape",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "\n_TOOL = 'return_delivered_order_items'\n_FIELD = 'order_id'\n_ID_FIELD = 'order_id'\n\n\ndef _names(field):\n    return [field, field[:-1]] if field.endswith(\"s\") else [field]\n\n\ndef _under(node, field):\n    \"\"\"Every scalar this part of the world holds under one of these column names, canonical.\"\"\"\n    wanted = _names(field)\n    out = []\n    stack = [node]\n    while stack:\n        item = stack.pop()\n        if isinstance(item, dict):\n            for name, value in item.items():\n                if name in wanted and not isinstance(value, (dict, list, tuple)):\n                    out.append(str(canon(value)))\n                else:\n                    stack.append(value)\n        elif isinstance(item, (list, tuple)):\n            for value in item:\n                stack.append(value)\n    return out\n\n\ndef _row(state, id_field, id_value):\n    \"\"\"The part of the Starting state the write's own id names: a row keyed by it, or one holding it.\"\"\"\n    want = str(canon(id_value))\n    stack = [state]\n    while stack:\n        item = stack.pop()\n        if isinstance(item, dict):\n            if id_field in item and str(canon(item.get(id_field))) == want:\n                return item\n            for name, value in item.items():\n                if str(canon(name)) == want and isinstance(value, (dict, list)):\n                    return value\n                stack.append(value)\n        elif isinstance(item, (list, tuple)):\n            for value in item:\n                stack.append(value)\n    return None\n\n\ndef check(pre_state, write_call, transcript):\n    if write_call.get(\"name\") != _TOOL:\n        return True\n    args = write_call.get(\"arguments\") or {}\n    if _FIELD not in args:\n        return True\n    value = args[_FIELD]\n    if value is None or value == \"\" or value == [] or value == {}:\n        return False\n    row = _row(pre_state, _ID_FIELD, args.get(_ID_FIELD)) if _ID_FIELD in args else None\n    known = _under(row, _FIELD) if row is not None else []\n    if not known:\n        return True\n    parts = value if isinstance(value, (list, tuple)) else [value]\n    return all(str(canon(part)) in known for part in parts)\n",
+        "read_tools": [],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "return_delivered_order_items writes under payment_method_id a value the world holds there for the row it acts on",
+      "id": "w0.payment_method_id",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+4176 chars]",
+      "provenance": null,
+      "spans": [],
+      "target": {
+        "constraint_id": "w0.payment_method_id",
+        "derived_as": "shape",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "\n_TOOL = 'return_delivered_order_items'\n_FIELD = 'payment_method_id'\n_ID_FIELD = 'order_id'\n\n\ndef _names(field):\n    return [field, field[:-1]] if field.endswith(\"s\") else [field]\n\n\ndef _under(node, field):\n    \"\"\"Every scalar this part of the world holds under one of these column names, canonical.\"\"\"\n    wanted = _names(field)\n    out = []\n    stack = [node]\n    while stack:\n        item = stack.pop()\n        if isinstance(item, dict):\n            for name, value in item.items():\n                if name in wanted and not isinstance(value, (dict, list, tuple)):\n                    out.append(str(canon(value)))\n                else:\n                    stack.append(value)\n        elif isinstance(item, (list, tuple)):\n            for value in item:\n                stack.append(value)\n    return out\n\n\ndef _row(state, id_field, id_value):\n    \"\"\"The part of the Starting state the write's own id names: a row keyed by it, or one holding it.\"\"\"\n    want = str(canon(id_value))\n    stack = [state]\n    while stack:\n        item = stack.pop()\n        if isinstance(item, dict):\n            if id_field in item and str(canon(item.get(id_field))) == want:\n                return item\n            for name, value in item.items():\n                if str(canon(name)) == want and isinstance(value, (dict, list)):\n                    return value\n                stack.append(value)\n        elif isinstance(item, (list, tuple)):\n            for value in item:\n                stack.append(value)\n    return None\n\n\ndef check(pre_state, write_call, transcript):\n    if write_call.get(\"name\") != _TOOL:\n        return True\n    args = write_call.get(\"arguments\") or {}\n    if _FIELD not in args:\n        return True\n    value = args[_FIELD]\n    if value is None or value == \"\" or value == [] or value == {}:\n        return False\n    row = _row(pre_state, _ID_FIELD, args.get(_ID_FIELD)) if _ID_FIELD in args else None\n    known = _under(row, _FIELD) if row is not None else []\n    if not known:\n        return True\n    parts = value if isinstance(value, (list, tuple)) else [value]\n    return all(str(canon(part)) in known for part in parts)\n",
+        "read_tools": [],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "the final answer may state #W9502127; the request did not ask the agent about it, so it is reported and rejects no Run",
+      "id": "c0",
+      "judge": false,
+      "kind": "allowed",
+      "predicate_src": "communicated('#W9502127')",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "reroll-task_000ffeb205cd-0",
+          "msg_index": 11,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "kind": "communicate_reported",
+        "text": "#W9502127",
+        "value": "\"#W9502127\""
+      }
+    },
+    {
+      "description": "the final answer may state 2872451762; the request did not ask the agent about it, so it is reported and rejects no Run",
+      "id": "c1",
+      "judge": false,
+      "kind": "allowed",
+      "predicate_src": "communicated('2872451762')",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "reroll-task_000ffeb205cd-0",
+          "msg_index": 18,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "kind": "communicate_reported",
+        "text": "2872451762",
+        "value": "\"2872451762\""
+      }
+    },
+    {
+      "description": "the final answer may state 9534205511; the request did not ask the agent about it, so it is reported and rejects no Run",
+      "id": "c2",
+      "judge": false,
+      "kind": "allowed",
+      "predicate_src": "communicated('9534205511')",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "reroll-task_000ffeb205cd-0",
+          "msg_index": 18,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "kind": "communicate_reported",
+        "text": "9534205511",
+        "value": "\"9534205511\""
+      }
+    },
+    {
+      "description": "the Run makes at most 1 write calls",
+      "id": "entity_count",
+      "judge": false,
+      "kind": "required",
+      "predicate_src": "writes_count() <= 1",
+      "provenance": null,
+      "spans": [],
+      "target": {
+        "count": 1,
+        "kind": "entity_count"
+      }
+    },
+    {
+      "description": "As a retail agent, you can help users:",
+      "id": "hard.c_1d2e9959aaff",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+2684 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 0,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_1d2e9959aaff",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    name = write_call.get('name', '').lower()\n    allowed = ['cancel_order', 'modify_order', 'return_order', 'exchange_order', 'modify_user_address', 'update_user_address', 'get_user_profile', 'get_user_info', 'get_order', 'get_order_info', 'get_order_details', 'get_product', 'get_product_info', 'get_product_details']\n    if name in allowed:\n        return True\n    if name in ['delete_account', 'create_order', 'place_order', 'modify_payment_method', 'send_message']:\n        return False\n    return True",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "**cancel or modify pending orders**",
+      "id": "hard.c_6d8ea589e4cf",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+2900 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 1,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_6d8ea589e4cf",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    name = write_call.get(\"name\", \"\").lower()\n    covered = name in [\"cancel_order\", \"modify_order\", \"cancel_pending_order\", \"modify_pending_order\"] or (\"order\" in name and (\"cancel\" in name or \"modify\" in name))\n    if not covered:\n        return True\n    arguments = write_call.get(\"arguments\", {})\n    order_id = arguments.get(\"order_id\")\n    orders = pre_state.get(\"orders\", [])\n    order = None\n    if isinstance(orders, dict):\n        order = orders.get(order_id)\n    else:\n        for candidate in orders:\n            if candidate.get(\"order_id\") == order_id or candidate.get(\"id\") == order_id:\n                order = candidate\n                break\n    return order is not None and order.get(\"status\") == \"pending\"",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "**return or exchange delivered orders**",
+      "id": "hard.c_c786207b0d22",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+2709 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 2,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_c786207b0d22",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    name = write_call.get(\"name\", \"\").lower()\n    if \"return\" not in name and \"exchange\" not in name:\n        return True\n\n    arguments = write_call.get(\"arguments\", {})\n    order_id = arguments.get(\"order_id\")\n    orders = pre_state.get(\"orders\", {})\n    order = None\n\n    if order_id is not None:\n        order = orders.get(order_id)\n    if order is None and len(orders) == 1:\n        for value in orders.values():\n            order = value\n    if order is None:\n        return False\n    return order.get(\"status\") == \"delivered\"",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "**modify their default user address**",
+      "id": "hard.c_4d4d28745211",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+2308 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 3,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_4d4d28745211",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    if write_call.get(\"name\") != \"update_user_address\":\n        return True\n    return \"address\" in write_call.get(\"arguments\", {})",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "**provide information about their own profile, orders, and related products**",
+      "id": "hard.c_efcf60ce6a52",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+3303 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 4,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_efcf60ce6a52",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript) -> bool:\n    name = write_call.get(\"name\", \"\").lower()\n    domains = [\"profile\", \"user\", \"order\", \"product\"]\n    verbs = [\"get\", \"fetch\", \"lookup\", \"look_up\", \"search\", \"retrieve\", \"list\", \"show\", \"info\", \"details\"]\n    is_information_call = False\n    for domain in domains:\n        if domain in name:\n            for verb in verbs:\n                if verb in name:\n                    is_information_call = True\n    if not is_information_call:\n        return True\n    authenticated = False\n    for turn in transcript:\n        for tool_call in turn.get(\"tool_calls\", []):\n            tool_name = tool_call.get(\"name\", \"\").lower()\n            has_lookup_verb = False\n            for verb in [\"find\", \"lookup\", \"look_up\", \"search\", \"locate\", \"get\", \"authenticate\"]:\n                if verb in tool_name:\n                    has_lookup_verb = True\n            if \"user\" in tool_name and has_lookup_verb and \"email\" in tool_name:\n                authenticated = True\n            if \"user\" in tool_name and has_lookup_verb and \"name\" in tool_name and \"zip\" in tool_name:\n                authenticated = True\n    return authenticated",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "At the beginning of the conversation, you have to authenticate the user identity by locating their user id via email, or via name + zip code.",
+      "id": "hard.c_9f52317fb6df",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+3166 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 5,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_9f52317fb6df",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    first_tool_seen = False\n    authenticated_first = False\n    for turn in transcript:\n        calls = turn.get(\"tool_calls\", [])\n        for call in calls:\n            name = call.get(\"name\", \"\").lower()\n            args = call.get(\"arguments\", {})\n            if not first_tool_seen:\n                first_tool_seen = True\n                by_email = (\"email\" in name and (\"user\" in name or \"customer\" in name or \"id\" in name))\n                by_name_zip = ((\"zip\" in name or \"postal\" in name) and (\"user\" in name or \"customer\" in name or \"id\" in name))\n                email_args = \"email\" in args\n                name_zip_args = \"name\" in args and (\"zip\" in args or \"zipcode\" in args or \"postal_code\" in args)\n                if by_email or by_name_zip or ((email_args or name_zip_args) and (\"user\" in name or \"customer\" in name or \"lookup\" in name or \"find\" in name or \"get\" in name)):\n                    authenticated_first = True\n    return first_tool_seen and authenticated_first",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "Once the user has been authenticated, you can provide the user with information about order, product, profile information, e.g. help the user look up order id.",
+      "id": "hard.c_63b92962fbc0",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+2583 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 7,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_63b92962fbc0",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    name = write_call.get(\"name\", \"\")\n    informational = name in [\"get_order_details\", \"get_product_details\", \"get_user_details\", \"get_order_id\", \"lookup_order_id\", \"look_up_order_id\"]\n    if not informational:\n        return True\n    authenticated = called_before(transcript, \"find_user_id_by_email\", \"find_user_id_by_name_zip\", \"get_user_id_by_email\", \"get_user_id_by_name_zip\")\n    return authenticated",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "You can only help one user per conversation (but you can handle multiple requests from the same user), and must deny any requests for tasks related to any other user.",
+      "id": "hard.c_63f1ee96fe80",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+2567 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 8,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_63f1ee96fe80",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    args = write_call.get(\"arguments\", {})\n    if \"user_id\" not in args:\n        return True\n    target_user_id = args.get(\"user_id\")\n    for turn in transcript:\n        for call in turn.get(\"tool_calls\", []):\n            call_args = call.get(\"arguments\", {})\n            if \"user_id\" in call_args and call_args.get(\"user_id\") != target_user_id:\n                return False\n    return True",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "You should transfer the user to a human agent if and only if the request cannot be handled within the scope of your actions.",
+      "id": "hard.c_36b6ab6dcc22",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+2843 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 14,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_36b6ab6dcc22",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    if write_call.get(\"name\") != \"transfer_to_human_agents\":\n        return True\n    text = \"\"\n    for turn in transcript:\n        if turn.get(\"role\") == \"user\":\n            text = turn.get(\"content\", \"\").lower()\n    other_user = [\"another user\", \"other user\", \"someone else\", \"someone else's\", \"my friend's\", \"my friend\", \"on behalf of\"]\n    for phrase in other_user:\n        if phrase in text:\n            return True\n    supported = [\"cancel\", \"modify\", \"change\", \"return\", \"exchange\", \"order\", \"product\", \"profile\", \"address\", \"payment\", \"user id\", \"email\", \"zip code\"]\n    for word in supported:\n        if word in text:\n            return False\n    return True",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "Each user has a profile containing:",
+      "id": "hard.c_11e36dc303d4",
+      "judge": true,
+      "kind": "hard",
+      "predicate_src": "",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 19,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_11e36dc303d4",
+        "judge": true,
+        "kind": "hard",
+        "predicate_src": null,
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "default address",
+      "id": "hard.c_3b94058fdfa3",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+2434 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 22,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_3b94058fdfa3",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    if write_call.get(\"name\") != \"update_user_address\":\n        return True\n    authenticated = called_before(transcript, \"get_user_id_by_email\") or called_before(transcript, \"get_user_id_by_name_zip\")\n    return authenticated and user_confirmed(transcript)",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "payment methods.",
+      "id": "hard.c_ec2a722f6706",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+3139 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 23,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_ec2a722f6706",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def valid_payment_method(value):\n    if isinstance(value, dict):\n        value = value.get(\"type\", value.get(\"method\", \"\"))\n    if not isinstance(value, str):\n        return True\n    normalized = value.strip().lower().replace(\"_\", \" \")\n    return normalized in [\"gift card\", \"paypal account\", \"credit card\"]\n\ndef check(pre_state, write_call, transcript):\n    name = write_call.get(\"name\", \"\").lower()\n    if \"payment\" not in name and \"method\" not in name:\n        return True\n    arguments = write_call.get(\"arguments\", {})\n    keys = [\"payment_method\", \"payment_method_type\", \"method_type\", \"payment_methods\", \"type\"]\n    found = False\n    for key in keys:\n        if key in arguments:\n            found = True\n            value = arguments[key]\n            if isinstance(value, list):\n                for item in value:\n                    if not valid_payment_method(item):\n                        return False\n            elif not valid_payment_method(value):\n                return False\n    return True",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "unique product id",
+      "id": "hard.c_4951be0be01b",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+2701 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 29,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_4951be0be01b",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    name = write_call.get(\"name\", \"\")\n    if \"product\" not in name:\n        return True\n    arguments = write_call.get(\"arguments\", {})\n    product_id = arguments.get(\"product_id\")\n    if product_id is None:\n        product = arguments.get(\"product\")\n        if product is not None:\n            product_id = product.get(\"product_id\")\n    if product_id is None:\n        return False\n    for product in pre_state.get(\"products\", []):\n        if product.get(\"product_id\") == product_id:\n            return False\n    return True",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "information about the value of the product options for this item.",
+      "id": "hard.c_7b0342e05b0a",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+3165 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 34,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_7b0342e05b0a",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    name = write_call.get(\"name\", \"\").lower()\n    covered = \"variant\" in name or name in [\"create_product\", \"update_product\", \"create_item\", \"update_item\"]\n    if not covered:\n        return True\n    arguments = write_call.get(\"arguments\", {})\n    variants = arguments.get(\"variants\")\n    if variants is None:\n        variants = arguments.get(\"items\")\n    if variants is None:\n        item = arguments.get(\"item\")\n        if item is None:\n            return False\n        variants = [item]\n    if not isinstance(variants, list) or len(variants) == 0:\n        return False\n    for variant in variants:\n        if not isinstance(variant, dict):\n            return False\n        options = variant.get(\"options\")\n        if options is None:\n            options = variant.get(\"option_values\")\n        if options is None:\n            options = variant.get(\"product_options\")\n        if options is None or options == {} or options == [] or options == \"\":\n            return False\n    return True",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "availability",
+      "id": "hard.c_b5d88b33b086",
+      "judge": true,
+      "kind": "hard",
+      "predicate_src": "",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 35,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_b5d88b33b086",
+        "judge": true,
+        "kind": "hard",
+        "predicate_src": null,
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "unique order id",
+      "id": "hard.c_d2db919409c5",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+2642 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 39,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_d2db919409c5",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    if write_call.get(\"name\") != \"create_order\":\n        return True\n    arguments = write_call.get(\"arguments\", {})\n    order_id = arguments.get(\"order_id\")\n    if order_id is None:\n        return False\n    orders = pre_state.get(\"orders\", [])\n    for order in orders:\n        if order == order_id:\n            return False\n        try:\n            if order.get(\"order_id\") == order_id:\n                return False\n        except:\n            pass\n    return True",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "items ordered",
+      "id": "hard.c_397882dfe87f",
+      "judge": true,
+      "kind": "hard",
+      "predicate_src": "",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 42,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_397882dfe87f",
+        "judge": true,
+        "kind": "hard",
+        "predicate_src": null,
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "fullfilments info (tracking id and item ids)",
+      "id": "hard.c_c3bce9128396",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+2624 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 44,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_c3bce9128396",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    arguments = write_call.get(\"arguments\", {})\n    if \"fulfillments\" not in arguments:\n        return True\n    fulfillments = arguments.get(\"fulfillments\")\n    if not isinstance(fulfillments, list):\n        return False\n    for fulfillment in fulfillments:\n        if not isinstance(fulfillment, dict):\n            return False\n        if \"tracking_id\" not in fulfillment or \"item_ids\" not in fulfillment:\n            return False\n    return True",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "The status of an order can be: **pending**, **processed**, **delivered**, or **cancelled**.",
+      "id": "hard.c_9632db46ef21",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+2367 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 46,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_9632db46ef21",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    arguments = write_call.get(\"arguments\", {})\n    if \"status\" not in arguments:\n        return True\n    return arguments.get(\"status\") in [\"pending\", \"processed\", \"delivered\", \"cancelled\"]",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "Generally, you can only take action on pending or delivered orders.",
+      "id": "hard.c_82e26ac2d01c",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+2891 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 48,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_82e26ac2d01c",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    name = write_call.get(\"name\", \"\")\n    action_names = [\"cancel_order\", \"modify_order\", \"return_order\", \"exchange_order\"]\n    if name not in action_names:\n        return True\n    arguments = write_call.get(\"arguments\", {})\n    order_id = arguments.get(\"order_id\")\n    orders = pre_state.get(\"orders\", {})\n    order = None\n    if orders.get(order_id) is not None:\n        order = orders.get(order_id)\n    else:\n        for candidate in orders:\n            if candidate.get(\"order_id\") == order_id or candidate.get(\"id\") == order_id:\n                order = candidate\n                break\n    if order is None:\n        return False\n    return order.get(\"status\") == \"pending\" or order.get(\"status\") == \"delivered\"",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "Exchange or modify order tools can only be called once per order.",
+      "id": "hard.c_11b8097733d6",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+2748 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 49,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_11b8097733d6",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    name = write_call.get(\"name\")\n    if name not in [\"exchange_order\", \"modify_order\"]:\n        return True\n    order_id = write_call.get(\"arguments\", {}).get(\"order_id\")\n    if order_id is None:\n        return False\n    for turn in transcript:\n        for call in turn.get(\"tool_calls\", []):\n            prior_name = call.get(\"name\")\n            if prior_name in [\"exchange_order\", \"modify_order\"]:\n                prior_order_id = call.get(\"arguments\", {}).get(\"order_id\")\n                if prior_order_id == order_id:\n                    return False\n    return True",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "The user needs to confirm the order id and the reason (either 'no longer needed' or 'ordered by mistake') for cancellation.",
+      "id": "hard.c_c51508c28a45",
+      "judge": true,
+      "kind": "hard",
+      "predicate_src": "",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 52,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_c51508c28a45",
+        "judge": true,
+        "kind": "hard",
+        "predicate_src": null,
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "Other reasons are not acceptable.",
+      "id": "hard.c_ebb7e03a3cc2",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+2398 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 53,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_ebb7e03a3cc2",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    if write_call.get(\"name\") not in [\"cancel_order\", \"cancel_pending_order\"]:\n        return True\n    reason = write_call.get(\"arguments\", {}).get(\"reason\")\n    return reason in [\"no longer needed\", \"ordered by mistake\"]",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "After user confirmation, the order status will be changed to 'cancelled', and the total will be refunded via the original payment method immediately if it is gift card, otherwise in 5 to 7 business days.",
+      "id": "hard.c_7a2fd3fe1a19",
+      "judge": true,
+      "kind": "hard",
+      "predicate_src": "",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 54,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_7a2fd3fe1a19",
+        "judge": true,
+        "kind": "hard",
+        "predicate_src": null,
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "An order can only be modified if its status is 'pending', and you should check its status before taking the action.",
+      "id": "hard.c_ab88b7266d3b",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+2957 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 55,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_ab88b7266d3b",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    if write_call.get(\"name\") != \"modify_order\":\n        return True\n    arguments = write_call.get(\"arguments\", {})\n    order_id = arguments.get(\"order_id\")\n    orders = pre_state.get(\"orders\", {})\n    order = orders.get(order_id, {})\n    if not order:\n        order = pre_state.get(\"order\", {})\n    status = order.get(\"status\")\n    if status is None:\n        status = pre_state.get(\"status\")\n    if status != \"pending\":\n        return False\n    for turn in transcript:\n        for call in turn.get(\"tool_calls\", []):\n            if call.get(\"name\") in [\"get_order\", \"get_order_status\", \"get_order_details\"]:\n                call_arguments = call.get(\"arguments\", {})\n                if call_arguments.get(\"order_id\") == order_id:\n                    return True\n    return False",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "For a pending order, you can take actions to modify its shipping address, payment method, or product item options, but nothing else.",
+      "id": "hard.c_4f3ffed95ca3",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+4018 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 56,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_4f3ffed95ca3",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    name = write_call.get(\"name\", \"\")\n    if name not in [\"modify_order\", \"modify_pending_order\"]:\n        return True\n    arguments = write_call.get(\"arguments\", {})\n    order_id = arguments.get(\"order_id\")\n    orders = pre_state.get(\"orders\", {})\n    order = orders.get(order_id, {})\n    if not order and pre_state.get(\"order_id\") == order_id:\n        order = pre_state\n    if order.get(\"status\") != \"pending\":\n        return False\n    allowed_actions = [\"shipping_address\", \"address\", \"payment_method\", \"item_options\", \"product_item_options\", \"items\"]\n    action = arguments.get(\"action\")\n    if action is None:\n        action = arguments.get(\"modification_type\")\n    if action is None:\n        action = arguments.get(\"type\")\n    if action is not None:\n        if action not in allowed_actions:\n            return False\n        for key in arguments.keys():\n            if key not in [\"order_id\", \"user_id\", \"action\", \"modification_type\", \"type\", \"modifications\"]:\n                return False\n        return True\n    modifications = arguments.get(\"modifications\")\n    if modifications is not None:\n        if not modifications:\n            return False\n        for key in modifications.keys():\n            if key not in [\"shipping_address\", \"address\", \"payment_method\", \"item_options\", \"product_item_options\", \"items\"]:\n                return False\n        for key in arguments.keys():\n            if key not in [\"order_id\", \"user_id\", \"modifications\"]:\n                return False\n        return True\n    allowed_fields = [\"shipping_address\", \"address\", \"payment_method\", \"item_options\", \"product_item_options\", \"items\"]\n    found = False\n    for key in arguments.keys():\n        if key in [\"order_id\", \"user_id\"]:\n            continue\n        if key not in allowed_fields:\n            return False\n        found = True\n    return found",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "The user can only choose a single payment method different from the original payment method.",
+      "id": "hard.c_d86c23b4b131",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+3351 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 57,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_d86c23b4b131",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    name = write_call.get(\"name\", \"\")\n    args = write_call.get(\"arguments\", {})\n    has_payment = \"payment_method\" in args or \"new_payment_method\" in args or \"payment_methods\" in args or \"new_payment_methods\" in args\n    is_payment_modify = (\"modify\" in name and has_payment) or name == \"modify_payment\"\n    if not is_payment_modify:\n        return True\n\n    if \"payment_methods\" in args:\n        methods = args.get(\"payment_methods\")\n        if len(methods) != 1:\n            return False\n        chosen = methods[0]\n    elif \"new_payment_methods\" in args:\n        methods = args.get(\"new_payment_methods\")\n        if len(methods) != 1:\n            return False\n        chosen = methods[0]\n    elif \"payment_method\" in args:\n        chosen = args.get(\"payment_method\")\n    else:\n        chosen = args.get(\"new_payment_method\")\n\n    order_id = args.get(\"order_id\")\n    orders = pre_state.get(\"orders\", {})\n    order = None\n    if order_id in orders:\n        order = orders.get(order_id)\n    if order is None:\n        order = pre_state.get(\"order\")\n    if order is None or \"payment_method\" not in order:\n        return False\n\n    return chosen != order.get(\"payment_method\")",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "If the user wants the modify the payment method to gift card, it must have enough balance to cover the total amount.",
+      "id": "hard.c_aa650641ebe1",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+3621 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 58,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_aa650641ebe1",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    name = str(write_call.get(\"name\", \"\")).lower()\n    if \"modify\" not in name:\n        return True\n\n    args = write_call.get(\"arguments\", {})\n    payment = args.get(\"payment_method\")\n    if payment is None:\n        payment = args.get(\"new_payment_method\")\n\n    kind = args.get(\"payment_method_type\")\n    card_id = args.get(\"gift_card_id\")\n    balance = args.get(\"gift_card_balance\")\n\n    try:\n        if payment is not None:\n            payment_kind = payment.get(\"type\", payment.get(\"kind\", payment.get(\"name\")))\n            if kind is None:\n                kind = payment_kind\n            if card_id is None:\n                card_id = payment.get(\"id\", payment.get(\"gift_card_id\"))\n            if balance is None:\n                balance = payment.get(\"balance\")\n    except:\n        if kind is None:\n            kind = payment\n\n    normalized_kind = str(kind if kind is not None else \"\").lower().replace(\"_\", \" \")\n    if normalized_kind != \"gift card\":\n        return True\n\n    order_id = args.get(\"order_id\")\n    orders = pre_state.get(\"orders\", {})\n    order = orders.get(order_id, {})\n    total = order.get(\"total_amount\", order.get(\"total\", order.get(\"amount\")))\n\n    if balance is None and card_id is not None:\n        gift_cards = pre_state.get(\"gift_cards\", {})\n        card = gift_cards.get(card_id, {})\n        balance = card.get(\"balance\")\n\n    if total is None or balance is None:\n        return False\n    return balance >= total",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "The original payment method will be refunded immediately if it is a gift card, otherwise it will be refunded within 5 to 7 business days.",
+      "id": "hard.c_070b718be2e0",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+2641 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 60,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_070b718be2e0",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    name = write_call.get(\"name\", \"\")\n    if name != \"modify_payment\":\n        return True\n    args = write_call.get(\"arguments\", {})\n    original = str(args.get(\"original_payment_method\", \"\")).lower()\n    timing = str(args.get(\"refund_timing\", \"\")).lower()\n    if original == \"gift card\":\n        return timing in [\"immediately\", \"immediate\"]\n    if original != \"\":\n        return timing in [\"within 5 to 7 business days\", \"5 to 7 business days\"]\n    return False",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "This action can only be called once, and will change the order status to 'pending (items modifed)'.",
+      "id": "hard.c_2228035adfc2",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+3443 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 61,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_2228035adfc2",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    name = write_call.get(\"name\", \"\")\n    args = write_call.get(\"arguments\", {})\n    is_action = name == \"modify_order_items\" or name == \"modify_items\" or (name == \"modify_order\" and (\"items\" in args or \"item_changes\" in args))\n    if not is_action:\n        return True\n    order_id = args.get(\"order_id\")\n    if order_id is None:\n        return False\n    if args.get(\"status\") != \"pending (items modifed)\":\n        return False\n    orders = pre_state.get(\"orders\", [])\n    order = None\n    if isinstance(orders, dict):\n        order = orders.get(order_id)\n    else:\n        for candidate in orders:\n            if candidate.get(\"order_id\") == order_id:\n                order = candidate\n                break\n    if order is None or order.get(\"status\") != \"pending\":\n        return False\n    for turn in transcript:\n        for call in turn.get(\"tool_calls\", []):\n            prior_name = call.get(\"name\", \"\")\n            prior_args = call.get(\"arguments\", {})\n            prior_action = prior_name == \"modify_order_items\" or prior_name == \"modify_items\" or (prior_name == \"modify_order\" and (\"items\" in prior_args or \"item_changes\" in prior_args))\n            if prior_action and prior_args.get(\"order_id\") == order_id:\n                return False\n    return True",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "The agent will not be able to modify or cancel the order anymore.",
+      "id": "hard.c_766469f4bf92",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+2962 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 62,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_766469f4bf92",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    name = write_call.get(\"name\", \"\")\n    blocked_names = [\"modify_order\", \"modify_pending_order\", \"modify_items\", \"modify_order_items\", \"cancel_order\", \"cancel_pending_order\"]\n    if name not in blocked_names:\n        return True\n    target = write_call.get(\"arguments\", {}).get(\"order_id\")\n    orders = pre_state.get(\"orders\", [])\n    if isinstance(orders, dict):\n        orders = list(orders.values())\n    for order in orders:\n        if not isinstance(order, dict):\n            continue\n        status = order.get(\"status\")\n        if status != \"pending (items modifed)\" and status != \"pending (items modified)\":\n            continue\n        order_id = order.get(\"order_id\", order.get(\"id\"))\n        if target is None or target == order_id:\n            return False\n    return True",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    {
+      "description": "For a pending order, each item can be modified to an available new item of the same product but of different product option.",
+      "id": "hard.c_ba399b27ab39",
+      "judge": false,
+      "kind": "hard",
+      "predicate_src": "\n_YES = (\"yes\", \"yeah\", \"yep\", \"confirm\", \"confirmed\", \"sure\", \"ok\", \"okay\", \"correct\", \"proceed\")\n_YES_PHRASES = (\"go ahead\", \"please do\", \"that is right\", \"that's right\")\n_NO = (\"no\", \"not\", \"never\", \"nope\", \"nah\", \"cannot\", \"cant\", \"dont\", \"stop\", \"wait\", \"wrong\", \"incorrect\")\n\ndef _plain_words(text):\n    return set(\"\".join(c if (c.isalnum() or c.isspace()) else \" \" for c in text).split())\n\ndef user_confirmed(transcript):\n    \"\"\"True when the last user turn says yes to an action an assistant turn proposed (D43 case 3).\"\"\"\n    messages = list(transcript or [])\n    last = None\n    for pos in range(len(messages) - 1, -1, -1):\n        if messages[pos].get(\"role\") == \"user\":\n            last = pos\n            break\n    if last is None:\n        return False\n    proposal = \"\"\n    for msg in reversed(messages[:last]):\n        if msg.get(\"role\") == \"assistant\" and (msg.get(\"content\") or \"\").strip():\n            proposal = msg.get(\"content\") or \"\"\n            break\n    if \"?\" not in proposal:\n        return False  # nothing was proposed, so nothing was confirmed\n    text = (messages[last].get(\"content\") or \"\").lower()\n    words = _plain_words(text)\n    if words & set(_NO) or \"n't\" in text:\n        return False  # a refusal that happens to carry a yes word is still a refusal\n    return bool(words & set(_YES)) or any(phrase in text for phrase in _YES_PHRASES)\n\ndef called_before(transcript, *names):\n    \"\"\"True when the transcript already holds a tool call with one of these names.\"\"\"\n    wanted = set(names)\n    for msg in list(transcript or []):\n        for call in msg.get(\"tool_calls\") or []:\n            if call.get(\"name\") in wanted:\n                return True\n    return False\n\ndef said_before(transcript, *needles):\n    \"\"\"True when an assistant turn already contains one of these strings, case-insensitive.\"\"\"\n    for msg in list(transcript or []):\n        if msg.get(\"role\") != \"assistant\":\n            continue\n        text = (msg.get(\"content\") or \"\").lower()\n        if any(needle.lower() in text for needle in needles):\n            return True\n    return False\n\n\ndef _has_token(text, needle):\n    hay = str(text).lower()\n    need = str(needle).lower()\n    if not need or not hay:\n        return False\n    start = 0\n    while True:\n        at = hay.find(need, start)\n        if at < 0:\n            return False\n        before = hay[at - 1] if at else \" \"\n        after = hay[at + len(need)] if at + len(need) < len(hay) else \" \"\n        if not before.isalnum() and not aft...[+5927 chars]",
+      "provenance": null,
+      "spans": [
+        {
+          "file_hash": "8a80a07edc5d308465f1435af8a01a56f1e4a37409e2b2fe6e679046e19d3f23",
+          "msg_index": 65,
+          "section": null,
+          "sim_index": null
+        }
+      ],
+      "target": {
+        "constraint_id": "c_ba399b27ab39",
+        "judge": false,
+        "kind": "hard",
+        "predicate_src": "def check(pre_state, write_call, transcript):\n    name = write_call.get(\"name\", \"\")\n    args = write_call.get(\"arguments\", {})\n    lowered = name.lower()\n    item_key = None\n    for key in (\"items\", \"item_changes\", \"order_items\", \"items_to_modify\"):\n        if key in args:\n            item_key = key\n            break\n    if \"modify\" not in lowered or item_key is None:\n        return True\n\n    order_id = args.get(\"order_id\")\n    order = None\n    orders = pre_state.get(\"orders\", {})\n    if isinstance(orders, dict):\n        order = orders.get(order_id)\n    elif isinstance(orders, list):\n        for candidate in orders:\n            if isinstance(candidate, dict) and candidate.get(\"order_id\", candidate.get(\"id\")) == order_id:\n                order = candidate\n                break\n    if not isinstance(order, dict) or order.get(\"status\") != \"pending\":\n        return False\n\n    changes = args.get(item_key)\n    if not isinstance(changes, list) or len(changes) == 0:\n        return False\n    order_items = order.get(\"items\", [])\n    if not isinstance(order_items, list):\n        return False\n\n    catalog = pre_state.get(\"items\", {})\n    products = pre_state.get(\"products\", {})\n    for change in changes:\n        if not isinstance(change, dict):\n            return False\n        old_id = change.get(\"item_id\", change.get(\"old_item_id\", change.get(\"current_item_id\")))\n        new_id = change.get(\"new_item_id\", change.get(\"to_item_id\"))\n        old_item = None\n        for candidate in order_items:\n            if isinstance(candidate, dict) and candidate.get(\"item_id\", candidate.get(\"id\")) == old_id:\n                old_item = candidate\n                break\n        new_item = change.get(\"new_item\")\n        if new_item is None and new_id is not None:\n            if isinstance(catalog, dict):\n                new_item = catalog.get(new_id)\n            elif isinstance(catalog, list):\n                for candidate in catalog:\n                    if isinstance(candidate, dict) and candidate.get(\"item_id\", candidate.get(\"id\")) == new_id:\n                        new_item = candidate\n                        break\n        if new_item is None and isinstance(products, dict):\n            for product in products.values():\n                if not isinstance(product, dict):\n                    continue\n                for variant in product.get(\"variants\", []):\n                    if isinstance(variant, dict) and variant.get(\"item_id\", variant.get(\"id\")) == new_id:\n                        ...[+1296 chars]",
+        "read_tools": [
+          "find_user_id_by_email",
+          "find_user_id_by_name_zip",
+          "get_order_details",
+          "get_user_details"
+        ],
+        "write_tools": [
+          "cancel_pending_order",
+          "exchange_delivered_order_items",
+          "modify_pending_order_address",
+          "modify_pending_order_items",
+          "modify_pending_order_payment",
+          "modify_user_address",
+          "return_delivered_order_items"
+        ]
+      }
+    },
+    "...[+6 items]"
+  ],
+  "seed_run_ids": [
+    "reroll-task_000ffeb205cd-0",
+    "reroll-task_000ffeb205cd-1"
+  ],
+  "task_id": "task_000ffeb205cd",
+  "verifier_version": "1"
+}

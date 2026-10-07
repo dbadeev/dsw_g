@@ -1,0 +1,9 @@
+{
+  "anchor_run_ids": [],
+  "category_id": "cat_4f53cda18c2b",
+  "id": "task_000ffeb205cd",
+  "intent": "Return two items: an air purifier and a vacuum cleaner",
+  "name": null,
+  "run_ids": [],
+  "unguarded": true
+}

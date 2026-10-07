@@ -1,0 +1,31 @@
+{
+  "record": {
+    "args": {
+      "expression": "985.66 + 953.39"
+    },
+    "cut_marker": null,
+    "error": null,
+    "has_result": true,
+    "id": "toolu_015aCPYZomy3Y8mSckngoMsW",
+    "latency_ms": 0.222,
+    "name": "calculate",
+    "raw_ptr": {
+      "file_hash": "f344a3a63783018b693f2a1a60b80b9d4f86fce6d5df74c0fcba647baacbea00",
+      "msg_index": 15,
+      "section": null,
+      "sim_index": 84
+    },
+    "requestor": "assistant",
+    "resolved": true,
+    "result": "1939.05",
+    "result_ptr": {
+      "file_hash": "f344a3a63783018b693f2a1a60b80b9d4f86fce6d5df74c0fcba647baacbea00",
+      "msg_index": 16,
+      "section": null,
+      "sim_index": 84
+    },
+    "trace_id": "2df1bf0f-aa28-43da-bc31-66288c7c6816",
+    "truncated": false,
+    "visible_len": null
+  }
+}
